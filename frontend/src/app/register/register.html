@@ -1,0 +1,19 @@
+<div class="container mx-auto flex flex-col items-center justify-center h-screen gap-8">
+    <h1 class="font-bold text-6xl">Register</h1>
+    <div class="border shadow-md p-8 w-full max-w-md flex flex-col gap-4 rounded">
+       <div class="flex flex-col gap-2">
+         <label for="register-email">Email</label>
+        <input pInputText type="text" placeholder="Email" class="w-full mb-4" id="register-email"/>
+       </div>
+       <div class="flex flex-col gap-2">
+         <label for="register-password">Password</label>
+         <input pInputText type="password" placeholder="Password" class="w-full mb-4" id="register-password"/>
+       </div>
+       <div class="flex flex-col gap-2">
+         <label for="register-repeat-password">Repeat Password</label>
+         <input pInputText type="password" placeholder="Repeat Password" class="w-full mb-4" id="register-repeat-password"/>
+       </div>
+       <a href="/login" class="text-green-400 hover:underline text-sm">Already have an account? Login here.</a>
+        <button pButton type="button" label="Register" class="w-full"></button>
+    </div>
+</div>
