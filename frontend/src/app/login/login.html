@@ -1,3 +1,21 @@
-<div>
-    <h1>Login</h1>
+<div class="container mx-auto flex flex-col items-center justify-center h-screen gap-8">
+  <h1 class="font-bold text-6xl">Login</h1>
+  <div class="border shadow-md p-8 w-full max-w-md flex flex-col gap-4 rounded">
+    <div class="flex flex-col gap-2">
+      <label for="login-email">Email</label>
+      <input pInputText type="text" placeholder="Email" class="w-full mb-4" id="login-email" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <label for="login-password">Password</label>
+      <input
+        pInputText
+        type="password"
+        placeholder="Password"
+        class="w-full mb-4"
+        id="login-password"
+      />
+    </div>
+    <a href="/register" class="text-green-400 hover:underline text-sm">Don't have an account? Register here.</a>
+    <button pButton type="button" label="Login" class="w-full" (click)="loginUser()"></button>
+  </div>
 </div>
