@@ -29,12 +29,15 @@ export type Tour = {
     description: string;
     logs? : TourLog[];
     creatorId: number;
+    id?: number;
 } 
 
 @Injectable({
   providedIn: 'root',
 })
 export class TourStateService {
+
+    private tourIdCounter = 1;
 
     private userStateService = inject(UserStateService);
 
@@ -43,11 +46,16 @@ export class TourStateService {
     public tours = this._tours.asReadonly();
 
     public addTour(tour: Tour) {
+        tour.id = this.tourIdCounter++;
         this._tours.set([...this._tours(), tour]);
     }
     
     public removeTour(tourName: string) {
         this._tours.set(this._tours().filter(t => t.tourName !== tourName));
+    }
+
+    public editTour(updatedTour: Tour) {
+        this._tours.set(this._tours().map(t => t.id === updatedTour.id ? updatedTour : t));
     }
 
     readonly userTours = computed(() => {
@@ -57,4 +65,8 @@ export class TourStateService {
         }
         return this._tours().filter(t => t.creatorId === currentUser.id);
     });
+
+    getTourById(id: number): Tour | undefined {
+        return this._tours().find(t => t.id === id);
+    }
 }
