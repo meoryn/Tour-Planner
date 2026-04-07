@@ -16,7 +16,7 @@ export class UserStateService {
   public users = this._users.asReadonly();
   public currentUser = this._currentUser.asReadonly();
 
-  addUser(user: User) {
+  registerUser(user: User) {
     this._users.set([...this._users(), user]);
   }
 
