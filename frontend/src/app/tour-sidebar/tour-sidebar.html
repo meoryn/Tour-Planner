@@ -1,0 +1,27 @@
+<div class="flex flex-col gap-4 items-center">
+  <p-selectbutton [options]="transportTypes" [ngModel]="selectedTransport()"
+    (ngModelChange)="selectedTransport.set($event)" optionLabel="label" optionValue="value" />
+
+  <input pInputText [value]="from()" (input)="from.set($any($event.target).value)" placeholder="From" class="w-full" />
+  <input pInputText [value]="to()" (input)="to.set($any($event.target).value)" placeholder="To" class="w-full" />
+
+  <div class="w-full py-2">
+    <h3 class="text-center font-semibold mb-2 text-xl pb-5">Route Details</h3>
+    <div class="flex justify-around">
+      <div class="flex flex-col items-center gap-2">
+        <span class="font-bold text-lg">Distance:</span>
+        <span> {{ distance() }} km</span>
+      </div>
+      <div class="flex flex-col items-center gap-2">
+        <span class="font-bold text-lg">Duration:</span>
+        <span> {{ duration() }} min</span>
+      </div>
+    </div>
+  </div>
+
+  <input pInputText [value]="tourName()" (input)="tourName.set($event.target.value)" placeholder="Tour Name" class="w-full" />
+  <textarea pTextarea [value]="description()" (input)="description.set($any($event.target).value)" placeholder="Description" rows="5"
+    class="w-full"></textarea>
+
+  <button pButton [label]="mode() + ' Tour'" class="w-full" (click)="addTour()"></button>
+</div>
