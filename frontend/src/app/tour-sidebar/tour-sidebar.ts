@@ -1,4 +1,4 @@
-import { Component, input, signal, inject } from '@angular/core';
+import { Component, input, linkedSignal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SelectButton } from 'primeng/selectbutton';
 import { InputText } from 'primeng/inputtext';
@@ -13,7 +13,6 @@ import { TransportType, Tour, TourStateService } from '../tour-state-service';
   standalone: true,
 })
 export class TourSidebarComponent {
-
   private tourStateService = inject(TourStateService);
 
   transportTypes = [
@@ -23,23 +22,24 @@ export class TourSidebarComponent {
   ];
 
   mode = input<'Add' | 'Edit'>('Add');
+  currentTour = input<Tour | null>(null);
 
-  selectedTransport = signal<TransportType>(TransportType.Car);
+  selectedTransport = linkedSignal<TransportType>(() => this.currentTour()?.transportType ?? TransportType.Car);
 
-  from = signal<string>('');
-  to = signal<string>('');
-  tourName = signal<string>('');
-  description = signal<string>('');
+  from = linkedSignal<string>(() => this.currentTour()?.from ?? '');
+  to = linkedSignal<string>(() => this.currentTour()?.to ?? '');
+  tourName = linkedSignal<string>(() => this.currentTour()?.tourName ?? '');
+  description = linkedSignal<string>(() => this.currentTour()?.description ?? '');
 
-  distance = signal<number>(0);
-  duration = signal<number>(0);
+  distance = linkedSignal<number>(() => this.currentTour()?.totalDistance ?? 0);
+  duration = linkedSignal<number>(() => this.currentTour()?.totalDuration ?? 0);
 
   addTour() {
     const newTour: Tour = {
       tourName: this.tourName(),
       description: this.description(),
-      from: { lat: 0, lng: 0 }, 
-      to: { lat: 0, lng: 0 }, 
+      from: this.from(),
+      to: this.to(),
       transportType: this.selectedTransport(),
       totalDistance: this.distance(),
       totalDuration: this.duration(),
@@ -55,14 +55,17 @@ export class TourSidebarComponent {
     const editedTour: Tour = {
       tourName: this.tourName(),
       description: this.description(),
-      from: { lat: 0, lng: 0 }, 
-      to: { lat: 0, lng: 0 }, 
+      from: this.from(),
+      to: this.to(),
       transportType: this.selectedTransport(),
       totalDistance: this.distance(),
       totalDuration: this.duration(),
       creatorId: 1,
+      id: this.currentTour()?.id,
     };
 
-    //TODO: add edit tour logic in tourStateService
+    this.tourStateService.editTour(editedTour);
+
+     console.log('Tour edited:', this.tourStateService.tours());
   }
 }

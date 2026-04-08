@@ -23,5 +23,6 @@
   <textarea pTextarea [value]="description()" (input)="description.set($any($event.target).value)" placeholder="Description" rows="5"
     class="w-full"></textarea>
 
-  <button pButton [label]="mode() + ' Tour'" class="w-full" (click)="addTour()"></button>
+  
+  <button pButton [label]="mode() + ' Tour'" class="w-full" (click)="mode() === 'Edit' ? editTour() : addTour()"></button>
 </div>

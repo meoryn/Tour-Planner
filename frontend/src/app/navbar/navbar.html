@@ -3,6 +3,7 @@
     <span class="text-xl font-bold"> Tour-Planner </span>
   </div>
   <div class="flex gap-4 items-center justify-around">
-    <a routerLink="/login" class="text-green-500 hover:underline cursor-pointer">Login</a>
+    <a [routerLink]="'/login'" class="text-green-500 hover:underline cursor-pointer">Login</a>
+    <a [routerLink]="'/tour/1/edit'" class="text-green-500 hover:underline cursor-pointer">Tour Edit</a>
   </div>
 </div>

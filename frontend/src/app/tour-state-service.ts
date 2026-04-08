@@ -23,8 +23,8 @@ export type Tour = {
     transportType: TransportType;
     totalDistance: number;
     totalDuration: number;
-    from: MapCoordinates;
-    to: MapCoordinates;
+    from: string;
+    to: string;
     tourName: string;
     description: string;
     logs? : TourLog[];
