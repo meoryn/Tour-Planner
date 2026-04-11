@@ -5,6 +5,7 @@ import { InputText } from 'primeng/inputtext';
 import { Textarea } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
 import { TransportType, Tour, TourStateService } from '../tour-state-service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-tour-sidebar',
@@ -14,6 +15,7 @@ import { TransportType, Tour, TourStateService } from '../tour-state-service';
 })
 export class TourSidebarComponent {
   private tourStateService = inject(TourStateService);
+  private router = inject(Router);
 
   transportTypes = [
     { label: 'Walk', value: TransportType.Walk },
@@ -48,7 +50,7 @@ export class TourSidebarComponent {
 
     this.tourStateService.addTour(newTour);
 
-    console.log('Tour added:', this.tourStateService.tours());
+    this.router.navigate(['/tourlist']);
   }
 
   editTour() {
@@ -66,6 +68,6 @@ export class TourSidebarComponent {
 
     this.tourStateService.editTour(editedTour);
 
-     console.log('Tour edited:', this.tourStateService.tours());
+    this.router.navigate(['/tourlist']);
   }
 }

@@ -1,12 +1,11 @@
-<div class="px-4 md:px-8 py-4 flex justify-between items-center gap-4 shadow-md sticky">
+<div class="px-4 md:px-8 py-4 flex justify-between items-center gap-4 shadow-md sticky top-0 z-10 bg-white">
   <div>
     <span class="text-xl font-bold"> Tour-Planner </span>
   </div>
 
   <!-- Desktop links -->
   <div class="hidden md:flex gap-4 items-center">
-    <a [routerLink]="'/login'" class="text-green-500 hover:underline cursor-pointer">Login</a>
-    <a [routerLink]="'/tour/1/edit'" class="text-green-500 hover:underline cursor-pointer">Tour Edit</a>
+    <a [routerLink]="'/tour/add'" class="text-green-500 hover:underline cursor-pointer">Create Tour</a>
     <a [routerLink]="'/tourlist'" class="text-green-500 hover:underline cursor-pointer">Tour List</a>
   </div>
 
@@ -20,8 +19,7 @@
     <span class="font-bold text-lg">Menu</span>
   </ng-template>
   <div class="flex flex-col gap-4">
-    <a [routerLink]="'/login'" class="text-green-500 hover:underline cursor-pointer" (click)="drawerVisible.set(false)">Login</a>
-    <a [routerLink]="'/tour/1/edit'" class="text-green-500 hover:underline cursor-pointer" (click)="drawerVisible.set(false)">Tour Edit</a>
+    <a [routerLink]="'/tour/add'" class="text-green-500 hover:underline cursor-pointer" (click)="drawerVisible.set(false)">Create Tour</a>
     <a [routerLink]="'/tourlist'" class="text-green-500 hover:underline cursor-pointer" (click)="drawerVisible.set(false)">Tour List</a>
   </div>
 </p-drawer>
