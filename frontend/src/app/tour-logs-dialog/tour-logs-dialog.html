@@ -1,7 +1,7 @@
 <p-dialog [header]="(tourStateService.selectedTour()?.tourName ?? '') + ' — Tour Logs'"
-  [(visible)]="visible" [modal]="true" [style]="{ width: '70rem' }" (onHide)="onHide()">
+  [(visible)]="visible" [modal]="true" [style]="{ width: '70rem', maxWidth: '95vw' }" (onHide)="onHide()">
 
-  <div class="grid grid-cols-[2fr_1fr] gap-6 h-96 md:h-125">
+  <div class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 h-auto md:h-125">
 
     <div class="flex flex-col gap-4 overflow-y-auto overflow-x-hidden pr-4">
       <h3 class="font-semibold text-lg">Logs</h3>
@@ -24,7 +24,7 @@
       }
     </div>
 
-    <div class="flex flex-col gap-3 border-l pl-6">
+    <div class="flex flex-col gap-3 md:border-l md:pl-6 border-t pt-4 md:border-t-0 md:pt-0">
       <h3 class="font-semibold text-lg">{{ editingLog() ? 'Edit Log' : 'New Log' }}</h3>
       <textarea pTextarea [ngModel]="logDescription()" (ngModelChange)="logDescription.set($event)"
         placeholder="Description" rows="5" class="w-full"></textarea>
