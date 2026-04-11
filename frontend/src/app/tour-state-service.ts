@@ -38,6 +38,7 @@ export type Tour = {
 })
 export class TourStateService {
   private tourIdCounter = 5;
+  private logIdCounter = 1;
 
   private userStateService = inject(UserStateService);
 
@@ -128,6 +129,57 @@ export class TourStateService {
 
   getTourById(id: number): Tour | undefined {
     return this._tours().find((t) => t.id === id);
+  }
+
+  public selectedTourId = signal<number | null>(null);
+
+  public selectedTour = computed(() => {
+    const id = this.selectedTourId();
+    if (id === null) return undefined;
+    return this._tours().find((t) => t.id === id);
+  });
+
+  public selectedTourLogs = computed(() => this.selectedTour()?.logs ?? []);
+
+  public selectTour(id: number) {
+    this.selectedTourId.set(id);
+  }
+
+  public clearSelection() {
+    this.selectedTourId.set(null);
+  }
+
+  public addTourLog(log: Omit<TourLog, 'id'>) {
+    const tourId = this.selectedTourId();
+    if (tourId === null) return;
+    const newLog: TourLog = { ...log, id: this.logIdCounter++ };
+    this._tours.set(
+      this._tours().map((t) =>
+        t.id === tourId ? { ...t, logs: [...(t.logs ?? []), newLog] } : t,
+      ),
+    );
+  }
+
+  public editTourLog(log: TourLog) {
+    const tourId = this.selectedTourId();
+    if (tourId === null) return;
+    this._tours.set(
+      this._tours().map((t) =>
+        t.id === tourId
+          ? { ...t, logs: (t.logs ?? []).map((l) => (l.id === log.id ? log : l)) }
+          : t,
+      ),
+    );
+  }
+
+  public removeTourLog(logId: number) {
+    const tourId = this.selectedTourId();
+    if (tourId === null) return;
+    this._tours.set(
+      this._tours().map((t) =>
+        t.id === tourId ? { ...t, logs: (t.logs ?? []).filter((l) => l.id !== logId) } : t,
+      ),
+    );
   }
 
   public setSearchQuery(query: string) {
