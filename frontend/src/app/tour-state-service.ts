@@ -4,69 +4,152 @@ import { UserStateService } from './user-state-service';
 export enum TransportType {
   Walk = 'walk',
   Car = 'car',
-  Train = 'train'
+  Train = 'train',
 }
 
+//Used later when we add leaflet maps
 export type MapCoordinates = {
-    lat: number;
-    lng: number;
-}
+  lat: number;
+  lng: number;
+};
 
 export type TourLog = {
-    id: number;
-    creationDate: Date;
-    description: string;
-    rating: number;
-}
+  id: number;
+  creationDate: Date;
+  description: string;
+  rating: number;
+};
 
 export type Tour = {
-    transportType: TransportType;
-    totalDistance: number;
-    totalDuration: number;
-    from: string;
-    to: string;
-    tourName: string;
-    description: string;
-    logs? : TourLog[];
-    creatorId: number;
-    id?: number;
-} 
+  transportType: TransportType;
+  totalDistance: number;
+  totalDuration: number;
+  from: string;
+  to: string;
+  tourName: string;
+  description: string;
+  logs?: TourLog[];
+  creatorId: number;
+  id?: number;
+};
 
 @Injectable({
   providedIn: 'root',
 })
 export class TourStateService {
+  private tourIdCounter = 5;
 
-    private tourIdCounter = 1;
+  private userStateService = inject(UserStateService);
 
-    private userStateService = inject(UserStateService);
+  private readonly _tours = signal<Tour[]>([
+    {
+      id: 1,
+      creatorId: 1,
+      tourName: 'Verlängertes Wochenende',
+      from: 'Wien',
+      to: 'Graz',
+      transportType: TransportType.Car,
+      totalDistance: 200,
+      totalDuration: 2,
+      description: 'Klassische Autofahrt durch die Steiermark.',
+      logs: [],
+    },
+    {
+      id: 2,
+      creatorId: 1, 
+      tourName: 'Familientrip',
+      from: 'Graz',
+      to: 'Salzburg',
+      transportType: TransportType.Train,
+      totalDistance: 280,
+      totalDuration: 3,
+      description: 'Entspannte Zugfahrt mit Blick auf die Alpen.',
+      logs: [],
+    },
+    {
+      id: 3,
+      creatorId: 1,
+      tourName: 'Alpenüberquerung',
+      from: 'Salzburg',
+      to: 'Innsbruck',
+      transportType: TransportType.Car,
+      totalDistance: 150,
+      totalDuration: 1.5,
+      description: 'Kurze Fahrt durch das Salzachtal.',
+      logs: [],
+    },
+    {
+      id: 4,
+      creatorId: 1,
+      tourName: 'Wien Stadtspaziergang',
+      from: 'Stephansdom',
+      to: 'Prater',
+      transportType: TransportType.Walk,
+      totalDistance: 5,
+      totalDuration: 1,
+      description: 'Gemütlicher Spaziergang durch die Wiener Innenstadt.',
+      logs: [],
+    },
+  ]);
 
-    private readonly _tours = signal<Tour[]>([]);
-    
-    public tours = this._tours.asReadonly();
+  public tours = this._tours.asReadonly();
 
-    public addTour(tour: Tour) {
-        tour.id = this.tourIdCounter++;
-        this._tours.set([...this._tours(), tour]);
+  public searchQuery = signal('');
+
+  public filteredTours = computed(() => {
+    const query = this.searchQuery().toLowerCase();
+    if (!query) return this._tours();
+    return this._tours().filter(
+      (t) =>
+        t.tourName.toLowerCase().includes(query) || t.description.toLowerCase().includes(query),
+    );
+  });
+
+  public addTour(tour: Tour) {
+    tour.id = this.tourIdCounter++;
+    this._tours.set([...this._tours(), tour]);
+  }
+
+  public removeTour(tourName: string) {
+    this._tours.set(this._tours().filter((t) => t.tourName !== tourName));
+  }
+
+  public editTour(updatedTour: Tour) {
+    this._tours.set(this._tours().map((t) => (t.id === updatedTour.id ? updatedTour : t)));
+  }
+
+  readonly userTours = computed(() => {
+    const currentUser = this.userStateService.currentUser();
+    if (!currentUser) {
+      return [];
     }
-    
-    public removeTour(tourName: string) {
-        this._tours.set(this._tours().filter(t => t.tourName !== tourName));
-    }
+    return this._tours().filter((t) => t.creatorId === currentUser.id);
+  });
 
-    public editTour(updatedTour: Tour) {
-        this._tours.set(this._tours().map(t => t.id === updatedTour.id ? updatedTour : t));
-    }
+  getTourById(id: number): Tour | undefined {
+    return this._tours().find((t) => t.id === id);
+  }
 
-    readonly userTours = computed(() => {
-        const currentUser = this.userStateService.currentUser();
-        if (!currentUser) {
-            return [];
-        }
-        return this._tours().filter(t => t.creatorId === currentUser.id);
-    });
+  public setSearchQuery(query: string) {
+    this.searchQuery.set(query);
+  }
 
-    getTourById(id: number): Tour | undefined {
-        return this._tours().find(t => t.id === id);
-    }
+  public exportAllTours() {
+    this.exportTours(this.filteredTours(), 'tours.json');
+  }
+
+  public exportSingleTour(tour: Tour) {
+    this.exportTours([tour], tour.tourName + '.json');
+  }
+
+  private exportTours(tours: Tour[], filename: string) {
+    const json = JSON.stringify(tours);
+    const blob = new Blob([json]);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 }

@@ -1,23 +1,20 @@
-import { Component, Input } from '@angular/core';
-import { Tour } from '../tour-state-service';
+import { Component, inject, Input } from '@angular/core';
+import { Tour, TourStateService } from '../tour-state-service';
+import { Card } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-tour-card',
-  imports: [],
+  imports: [Card, ButtonModule],
   templateUrl: './tour-card.html',
   styleUrl: './tour-card.css',
 })
 export class TourCard {
   @Input() tour!: Tour;
 
+  private tourStateService = inject(TourStateService);
+
   exportTour() {
-    const json = JSON.stringify(this.tour)
-    const blob = new Blob([json])
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url
-    a.download = this.tour.tourName + ".json";
-    a.click();
-    URL.revokeObjectURL(url);
+    this.tourStateService.exportSingleTour(this.tour);
   }
 }

@@ -1,11 +1,14 @@
-<div class="px-8 py-4 flex justify-between items-center gap-4 shadow-md">
+<div class="px-8 py-4 flex justify-between items-center gap-4 shadow-md sticky top-0 z-50">
   <div>
     <span class="text-xl font-bold"> Tour-Planner </span>
   </div>
   <div class="flex gap-4 items-center justify-around">
     <a [routerLink]="'/login'" class="text-green-500 hover:underline cursor-pointer">Login</a>
-    <a [routerLink]="'/tour/1/edit'" class="text-green-500 hover:underline cursor-pointer">Tour Edit</a>
-        <a [routerLink]="'/tourlist'" class="text-green-500 hover:underline cursor-pointer">Tour List</a>
-
+    <a [routerLink]="'/tour/1/edit'" class="text-green-500 hover:underline cursor-pointer"
+      >Tour Edit</a
+    >
+    <a [routerLink]="'/tourlist'" class="text-green-500 hover:underline cursor-pointer"
+      >Tour List</a
+    >
   </div>
 </div>

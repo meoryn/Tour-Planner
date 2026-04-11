@@ -1,6 +1,4 @@
 import { Routes } from '@angular/router';
-import { TourList } from './tour-list/tour-list';
-
 export const routes: Routes = [
     {
         path: '',
@@ -24,7 +22,6 @@ export const routes: Routes = [
     },
     {
         path: 'tourlist',
-        component: TourList
+        loadComponent: () => import('./tour-list/tour-list').then(m => m.TourList)
     }
-    
 ];

@@ -1,17 +1,20 @@
-<div class="border rounded-xl p-4">
-  <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
-
+<p-card>
+  <div class="flex justify-between items-center mb-4">
     <div class="flex items-center gap-4">
       <h2 class="text-3xl font-bold">{{ tour.tourName }}</h2>
-      <span>{{ tour.from }} &rarr; {{ tour.to }} | {{ tour.totalDistance }}km | {{ tour.totalDuration }}h | {{ tour.transportType }}</span>
+      <span class="text-gray-300">|</span>
+      <span>{{ tour.from }} &rarr; {{ tour.to }}</span>
+      <span class="text-gray-300">|</span>
+      <span>{{ tour.totalDistance }}km</span>
+      <span class="text-gray-300">|</span>
+      <span>{{ tour.totalDuration }}h</span>
+      <span class="text-gray-300">|</span>
+      <span>{{ tour.transportType[0].toUpperCase() + tour.transportType.substring(1) }}</span>
     </div>
-
-    <div class="flex gap-4 font-bold">
-      <button class="cursor-pointer" (click)="exportTour()">Export Tour</button>
-      <button>Tour Logs</button>
+    <div class="flex items-center gap-2">
+      <button pButton label="Export Tour" [text]="true" (click)="exportTour()"></button>
+      <button pButton label="Tour Logs" [text]="true"></button>
     </div>
-
   </div>
-
   <p>{{ tour.description }}</p>
-</div>
+</p-card>
