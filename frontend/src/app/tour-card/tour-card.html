@@ -1,0 +1,17 @@
+<div class="border rounded-xl p-4">
+  <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
+
+    <div class="flex items-center gap-4">
+      <h2 class="text-3xl font-bold">{{ tour.tourName }}</h2>
+      <span>{{ tour.from }} &rarr; {{ tour.to }} | {{ tour.totalDistance }}km | {{ tour.totalDuration }}h | {{ tour.transportType }}</span>
+    </div>
+
+    <div class="flex gap-4 font-bold">
+      <button class="cursor-pointer" (click)="exportTour()">Export Tour</button>
+      <button>Tour Logs</button>
+    </div>
+
+  </div>
+
+  <p>{{ tour.description }}</p>
+</div>

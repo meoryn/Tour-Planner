@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { TourList } from './tour-list/tour-list';
 
 export const routes: Routes = [
     {
@@ -20,5 +21,10 @@ export const routes: Routes = [
     {
         path: 'tour/add',
         loadComponent: () => import('./add-tour/add-tour').then(m => m.AddTourComponent)
+    },
+    {
+        path: 'tourlist',
+        component: TourList
     }
+    
 ];
