@@ -1,6 +1,7 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { UserStateService } from './user-state-service';
 import { NumberSymbol } from '@angular/common';
+import { TourApiService } from './tour-api-service';
 
 export enum TransportType {
   Walk = 'walk',
@@ -47,65 +48,20 @@ export type Tour = {
   providedIn: 'root',
 })
 export class TourStateService {
-  private tourIdCounter = 5;
-  private logIdCounter = 1;
-
   private userStateService = inject(UserStateService);
-
-  private readonly _tours = signal<Tour[]>([
-    {
-      id: 1,
-      creatorId: 1,
-      tourName: 'Verlängertes Wochenende',
-      from: 'Wien',
-      to: 'Graz',
-      transportType: TransportType.Car,
-      totalDistance: 200,
-      totalDuration: 2,
-      description: 'Klassische Autofahrt durch die Steiermark.',
-      logs: [],
-    },
-    {
-      id: 2,
-      creatorId: 1, 
-      tourName: 'Familientrip',
-      from: 'Graz',
-      to: 'Salzburg',
-      transportType: TransportType.Train,
-      totalDistance: 280,
-      totalDuration: 3,
-      description: 'Entspannte Zugfahrt mit Blick auf die Alpen.',
-      logs: [],
-    },
-    {
-      id: 3,
-      creatorId: 1,
-      tourName: 'Alpenüberquerung',
-      from: 'Salzburg',
-      to: 'Innsbruck',
-      transportType: TransportType.Car,
-      totalDistance: 150,
-      totalDuration: 1.5,
-      description: 'Kurze Fahrt durch das Salzachtal.',
-      logs: [],
-    },
-    {
-      id: 4,
-      creatorId: 1,
-      tourName: 'Wien Stadtspaziergang',
-      from: 'Stephansdom',
-      to: 'Prater',
-      transportType: TransportType.Walk,
-      totalDistance: 5,
-      totalDuration: 1,
-      description: 'Gemütlicher Spaziergang durch die Wiener Innenstadt.',
-      logs: [],
-    },
-  ]);
-
+  private apiService = inject(TourApiService);
+  private logIdCounter = 0
+  private readonly _tours = signal<Tour[]>([]);
   public tours = this._tours.asReadonly();
 
   public searchQuery = signal('');
+
+
+  constructor() {
+    this.loadTours();
+  }
+
+
 
   public filteredTours = computed(() => {
     const query = this.searchQuery().toLowerCase();
@@ -116,17 +72,50 @@ export class TourStateService {
     );
   });
 
-  public addTour(tour: Tour) {
-    tour.id = this.tourIdCounter++;
-    this._tours.set([...this._tours(), tour]);
+
+
+  public addTour(tour: Omit<Tour, "id">) {
+    this.apiService.addTour(tour).subscribe({
+      next: (created) => {
+        this._tours.set([...this._tours(), created])
+      },
+      error: (error) => {
+        console.log("Error:" + error)
+      }
+    })
   }
 
-  public removeTour(tourName: string) {
-    this._tours.set(this._tours().filter((t) => t.tourName !== tourName));
+  public loadTours() {
+    this.apiService.getAll().subscribe({
+      next: (tours) => this._tours.set(tours),
+      error: (err) => console.error(err),
+    });
+  }
+
+  //delete it from cached tourList, if the backend fails to delete -> rollback
+  public removeTour(tourId: number) {
+    const previousTours = this._tours();
+    this._tours.set(previousTours.filter((t) => t.id !== tourId));
+
+    this.apiService.delete(tourId).subscribe({
+      error: (err) => {
+        console.error(err);
+        this._tours.set(previousTours);
+      },
+    });
   }
 
   public editTour(updatedTour: Tour) {
+    const previousTours = this._tours();
+
     this._tours.set(this._tours().map((t) => (t.id === updatedTour.id ? updatedTour : t)));
+
+    this.apiService.update(updatedTour).subscribe({
+      error: (err) => {
+        console.error(err);
+        this._tours.set(previousTours);
+      },
+    });
   }
 
   readonly userTours = computed(() => {
@@ -162,34 +151,96 @@ export class TourStateService {
   public addTourLog(log: Omit<TourLog, 'id'>) {
     const tourId = this.selectedTourId();
     if (tourId === null) return;
-    const newLog: TourLog = { ...log, id: this.logIdCounter++ };
+
+    const tempLog: TourLog = { ...log, id: this.logIdCounter++ };
+    const previousTours = this._tours();
+
     this._tours.set(
-      this._tours().map((t) =>
-        t.id === tourId ? { ...t, logs: [...(t.logs ?? []), newLog] } : t,
-      ),
+      this._tours().map((t) => {
+        if (t.id !== tourId) return t;
+        const updatedLogs = [...(t.logs ?? []), tempLog];
+        return { ...t, logs: updatedLogs };
+      })
     );
+
+    this.apiService.addTourLog(tourId, log).subscribe({
+      next: (created) => { //sets id in _tours, if backend has answered
+        const currentTours = this._tours();
+
+        const updatedTours = currentTours.map((tour) => {
+          if (tour.id !== tourId) return tour;
+
+          const updatedLogs = (tour.logs ?? []).map((log) => {
+            const isTempLog = log.id === tempLog.id;
+            if (isTempLog) return created;
+            return log;
+          });
+
+          return { ...tour, logs: updatedLogs };
+        });
+
+        this._tours.set(updatedTours);
+      },
+
+      error: (err) => {
+        console.error(err);
+        this._tours.set(previousTours);
+      },
+    });
   }
 
-  public editTourLog(log: TourLog) {
+  editTourLog(log: TourLog) {
     const tourId = this.selectedTourId();
     if (tourId === null) return;
-    this._tours.set(
-      this._tours().map((t) =>
-        t.id === tourId
-          ? { ...t, logs: (t.logs ?? []).map((l) => (l.id === log.id ? log : l)) }
-          : t,
-      ),
-    );
+
+    const previousTours = this._tours();
+
+    const updatedTours = this._tours().map((tour) => {
+      if (tour.id !== tourId) {
+        return tour;
+      }
+      const existingLogs = tour.logs ?? [];
+      const updatedLogs = existingLogs.map((existingLog) => {
+        const isEditedLog = existingLog.id === log.id;
+        return isEditedLog ? log : existingLog;
+      });
+
+      return { ...tour, logs: updatedLogs };
+    });
+    this._tours.set(updatedTours);
+
+    this.apiService.updateTourLog(tourId, log).subscribe({
+      error: (err) => {
+        console.error(err);
+        this._tours.set(previousTours);
+      },
+    });
   }
 
   public removeTourLog(logId: number) {
     const tourId = this.selectedTourId();
     if (tourId === null) return;
-    this._tours.set(
-      this._tours().map((t) =>
-        t.id === tourId ? { ...t, logs: (t.logs ?? []).filter((l) => l.id !== logId) } : t,
-      ),
-    );
+    const previousTours = this._tours();
+
+    const updatedTours = this._tours().map((tour) => {
+      const isSelectedTour = tour.id === tourId;
+      if (!isSelectedTour) {
+        return tour;
+      }
+
+      const existingLogs = tour.logs ?? [];
+      const filteredLogs = existingLogs.filter((log) => log.id !== logId);
+
+      return { ...tour, logs: filteredLogs };
+    });
+    this._tours.set(updatedTours);
+
+    this.apiService.deleteTourLog(tourId, logId).subscribe({
+      error: (err) => {
+        console.error(err);
+        this._tours.set(previousTours);
+      },
+    });
   }
 
   public setSearchQuery(query: string) {

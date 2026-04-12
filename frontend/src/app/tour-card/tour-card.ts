@@ -27,6 +27,6 @@ export class TourCard {
     this.logsDialogVisible.set(true);
   }
   removeTour() {
-    this.tourStateService.removeTour(this.tour.tourName);
+    this.tourStateService.removeTour(this.tour.id!);
   }
 }
