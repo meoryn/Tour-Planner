@@ -55,6 +55,9 @@ Komponente, in der Touren erstellt und bearbeitet werden. Nimmt "Add" oder "Edit
 ### `TourLogsDialog`
 Modal, der die Logs der ausgewählten Tour anzeigt. Zeigt Datum, Distanz, Zeit, Rating und Schwierigkeitpro Log. Auf der rechten Seite des Dialogs ist ein Formular zum Hinzufügen/Bearbeiten von Logs.
 
+## INFO
+
+Angular Signals werden durchgehend für das State Management verwendet. Da PrimeNG (die verwendete Component-Library) Signals noch nicht vollständig & in allen Komponenten unterstützt, wird in Formularen teilweise noch "ngModel" für das Data binding eingesetzt, anstatt direkt mit Signals zu arbeiten.
 
 
 ### Wireframes
