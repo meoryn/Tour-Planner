@@ -10,8 +10,8 @@
       <h3 class="font-semibold text-lg">Logs</h3>
       @for (log of tourStateService.selectedTourLogs(); track log.id) {
         <div class="flex flex-col gap-2 border-b pb-4">
-          <div class="flex justify-between items-center">
-            <div class="flex items-center gap-4">
+          <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+            <div class="flex items-center gap-4 flex-wrap">
               <span class="font-semibold">{{ log.creationDate | date }}</span>
               <span class="text-sm text-surface-500 flex items-center gap-1">
                 <i class="pi pi-map-marker"></i>{{ log.totalDistance }} km
