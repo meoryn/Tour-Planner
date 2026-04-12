@@ -7,17 +7,20 @@ import { ButtonModule } from 'primeng/button';
 import { Textarea } from 'primeng/textarea';
 import { Rating } from 'primeng/rating';
 import { Tag } from 'primeng/tag';
+import { InputNumberModule } from 'primeng/inputnumber';
 import { getValidationErrors } from '../shared/validation-utils';
 import * as v from 'valibot';
 
 const TourLogSchema = v.object({
   description: v.pipe(v.string(), v.minLength(1, 'Description is required.')),
   rating: v.pipe(v.number(), v.minValue(1, 'Rating must be at least 1.')),
+  totalDistance: v.pipe(v.number(), v.minValue(0.1, 'Total distance must be at least 0.1 km.')),
+  totalTime: v.pipe(v.number(), v.minValue(1, 'Total time must be at least 1 min.')),
 });
 
 @Component({
   selector: 'app-tour-logs-dialog',
-  imports: [Dialog, ButtonModule, Textarea, Rating, FormsModule, DatePipe, Tag],
+  imports: [Dialog, ButtonModule, Textarea, Rating, FormsModule, DatePipe, Tag, InputNumberModule],
   templateUrl: './tour-logs-dialog.html',
   styleUrl: './tour-logs-dialog.css',
 })
@@ -50,6 +53,8 @@ export class TourLogsDialog {
     const formResult = v.safeParse(TourLogSchema, {
       description: this.logDescription(),
       rating: this.logRating(),
+      totalDistance: this.logTotalDistance(),
+      totalTime: this.logTotalTime(),
     });
 
     if (formResult.success) {
