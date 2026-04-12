@@ -1,9 +1,19 @@
-<div class="flex flex-col gap-4 items-center">
+<form (ngSubmit)="onSubmit()" class="flex flex-col gap-4 items-center">
   <p-selectbutton [options]="transportTypes" [ngModel]="selectedTransport()"
-    (ngModelChange)="selectedTransport.set($event)" optionLabel="label" optionValue="value" />
+    (ngModelChange)="selectedTransport.set($event)" optionLabel="label" optionValue="value" [ngModelOptions]="{standalone: true}" />
 
-  <input pInputText [value]="from()" (input)="from.set($any($event.target).value)" placeholder="From" class="w-full" />
-  <input pInputText [value]="to()" (input)="to.set($any($event.target).value)" placeholder="To" class="w-full" />
+  <div class="w-full flex flex-col gap-1">
+    <input pInputText [value]="from()" (input)="from.set($any($event.target).value)" placeholder="From" class="w-full" />
+    @if (errors()['from']) {
+      <small class="text-red-500 text-sm">{{ errors()['from'] }}</small>
+    }
+  </div>
+  <div class="w-full flex flex-col gap-1">
+    <input pInputText [value]="to()" (input)="to.set($any($event.target).value)" placeholder="To" class="w-full" />
+    @if (errors()['to']) {
+      <small class="text-red-500 text-sm">{{ errors()['to'] }}</small>
+    }
+  </div>
 
   <div class="w-full py-2">
     <h3 class="text-center font-semibold mb-2 text-xl pb-5">Route Details</h3>
@@ -19,10 +29,14 @@
     </div>
   </div>
 
-  <input pInputText [value]="tourName()" (input)="tourName.set($event.target.value)" placeholder="Tour Name" class="w-full" />
+  <div class="w-full flex flex-col gap-1">
+    <input pInputText [value]="tourName()" (input)="tourName.set($event.target.value)" placeholder="Tour Name" class="w-full" />
+    @if (errors()['tourName']) {
+      <small class="text-red-500 text-sm">{{ errors()['tourName'] }}</small>
+    }
+  </div>
   <textarea pTextarea [value]="description()" (input)="description.set($any($event.target).value)" placeholder="Description" rows="5"
     class="w-full"></textarea>
 
-  
-  <button pButton [label]="mode() + ' Tour'" class="w-full" (click)="mode() === 'Edit' ? editTour() : addTour()"></button>
-</div>
+  <button pButton [label]="mode() + ' Tour'" class="w-full" type="submit"></button>
+</form>

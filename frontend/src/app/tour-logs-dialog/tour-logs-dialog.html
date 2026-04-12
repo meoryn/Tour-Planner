@@ -24,18 +24,28 @@
       }
     </div>
 
-    <div class="flex flex-col gap-3 md:border-l md:pl-6 border-t pt-4 md:border-t-0 md:pt-0">
+    <form (ngSubmit)="onSubmit()" class="flex flex-col gap-3 md:border-l md:pl-6 border-t pt-4 md:border-t-0 md:pt-0">
       <h3 class="font-semibold text-lg">{{ editingLog() ? 'Edit Log' : 'New Log' }}</h3>
-      <textarea pTextarea [ngModel]="logDescription()" (ngModelChange)="logDescription.set($event)"
-        placeholder="Description" rows="5" class="w-full"></textarea>
-      <p-rating [ngModel]="logRating()" (ngModelChange)="logRating.set($event)" />
-      <div class="flex gap-2">
-        <button pButton [label]="editingLog() ? 'Save' : 'Add'" (click)="saveLog()"></button>
-        @if (editingLog()) {
-          <button pButton label="Cancel" [text]="true" (click)="resetForm()"></button>
+      <div class="flex flex-col gap-1">
+        <textarea pTextarea [ngModel]="logDescription()" (ngModelChange)="logDescription.set($event)"
+          placeholder="Description" rows="5" class="w-full" [ngModelOptions]="{standalone: true}"></textarea>
+        @if (errors()['description']) {
+          <small class="text-red-500 text-sm">{{ errors()['description'] }}</small>
         }
       </div>
-    </div>
+      <div class="flex flex-col gap-1">
+        <p-rating [ngModel]="logRating()" (ngModelChange)="logRating.set($event)" [ngModelOptions]="{standalone: true}" />
+        @if (errors()['rating']) {
+          <small class="text-red-500 text-sm">{{ errors()['rating'] }}</small>
+        }
+      </div>
+      <div class="flex gap-2">
+        <button pButton [label]="editingLog() ? 'Save' : 'Add'" type="submit"></button>
+        @if (editingLog()) {
+          <button pButton label="Cancel" type="button" [text]="true" (click)="resetForm()"></button>
+        }
+      </div>
+    </form>
 
   </div>
 
