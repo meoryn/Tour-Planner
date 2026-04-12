@@ -14,8 +14,10 @@
       </span>
     </div>
     <div class="flex items-center gap-2 mt-2 md:mt-0">
-      <button pButton label="Export Tour" [text]="true" (click)="exportTour()"></button>
-      <button pButton label="Tour Logs" [text]="true" (click)="showLogs()"></button>
+      <button pButton label="Export Tour" [text]="true" (click)="exportTour(); $event.stopPropagation()"></button>
+      <button pButton label="Tour Logs" [text]="true" (click)="showLogs(); $event.stopPropagation()"></button>
+      <button pButton label="Remove Tour" [text]="true" severity="danger" (click)="removeTour(); $event.stopPropagation()"></button>
+
     </div>
   </div>
   <p class="wrap-break-word">{{ tour.description }}</p>

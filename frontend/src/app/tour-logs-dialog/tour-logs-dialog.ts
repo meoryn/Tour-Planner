@@ -1,19 +1,25 @@
 import { Component, inject, model, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TourLog, TourStateService } from '../tour-state-service';
+import { TourDifficulty, TourLog, TourStateService } from '../tour-state-service';
 import { Dialog } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { Textarea } from 'primeng/textarea';
 import { Rating } from 'primeng/rating';
+import { Tag } from 'primeng/tag';
+
+
 
 @Component({
   selector: 'app-tour-logs-dialog',
-  imports: [Dialog, ButtonModule, Textarea, Rating, FormsModule, DatePipe],
+  imports: [Dialog, ButtonModule, Textarea, Rating, FormsModule, DatePipe, Tag],
   templateUrl: './tour-logs-dialog.html',
   styleUrl: './tour-logs-dialog.css',
 })
 export class TourLogsDialog {
+
+  TourDifficulty = TourDifficulty;
+
   visible = model(false);
 
   tourStateService = inject(TourStateService);
@@ -21,6 +27,18 @@ export class TourLogsDialog {
   editingLog = signal<TourLog | null>(null);
   logDescription = signal('');
   logRating = signal(0);
+  logDifficulty = signal<TourDifficulty>(TourDifficulty.Easy)
+  logTotalDistance = signal(0);
+  logTotalTime = signal(0);
+
+  onDistanceChange(event: Event) {
+    this.logTotalDistance.set(+(event.target as HTMLInputElement).value);
+  }
+
+  onTimeChange(event: Event) {
+    this.logTotalTime.set(+(event.target as HTMLInputElement).value);
+  }
+
 
   saveLog() {
     const editing = this.editingLog();
@@ -30,12 +48,18 @@ export class TourLogsDialog {
         creationDate: editing.creationDate,
         description: this.logDescription(),
         rating: this.logRating(),
+        difficulty: this.logDifficulty(),
+        totalDistance: this.logTotalDistance(),
+        totalTime: this.logTotalTime()
       });
     } else {
       this.tourStateService.addTourLog({
         creationDate: new Date(),
         description: this.logDescription(),
         rating: this.logRating(),
+        difficulty: this.logDifficulty(),
+        totalDistance: this.logTotalDistance(),
+        totalTime: this.logTotalTime()
       });
     }
     this.resetForm();
@@ -45,6 +69,9 @@ export class TourLogsDialog {
     this.editingLog.set(log);
     this.logDescription.set(log.description);
     this.logRating.set(log.rating);
+    this.logDifficulty.set(log.difficulty)
+    this.logTotalDistance.set(log.totalDistance);
+    this.logTotalTime.set(log.totalTime)
   }
 
   deleteLog(logId: number) {
@@ -55,6 +82,9 @@ export class TourLogsDialog {
     this.editingLog.set(null);
     this.logDescription.set('');
     this.logRating.set(0);
+    this.logDifficulty.set(TourDifficulty.Easy)
+    this.logTotalDistance.set(0)
+    this.logTotalTime.set(0)
   }
 
   onHide() {
