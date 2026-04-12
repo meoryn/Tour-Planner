@@ -1,5 +1,6 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { UserStateService } from './user-state-service';
+import { NumberSymbol } from '@angular/common';
 
 export enum TransportType {
   Walk = 'walk',
@@ -17,8 +18,17 @@ export type TourLog = {
   id: number;
   creationDate: Date;
   description: string;
+  difficulty: TourDifficulty;
+  totalDistance: number;
+  totalTime: number;
   rating: number;
 };
+
+export enum TourDifficulty {
+  Hard,
+  Medium,
+  Easy
+}
 
 export type Tour = {
   transportType: TransportType;

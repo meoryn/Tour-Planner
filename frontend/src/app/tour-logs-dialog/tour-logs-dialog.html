@@ -1,31 +1,57 @@
-<p-dialog [header]="(tourStateService.selectedTour()?.tourName ?? '') + ' — Tour Logs'"
-  [(visible)]="visible" [modal]="true" [style]="{ width: '70rem', maxWidth: '95vw' }" (onHide)="onHide()">
+<p-dialog [header]="(tourStateService.selectedTour()?.tourName ?? '') + ' — Tour Logs'" [(visible)]="visible"
+  [modal]="true" [style]="{ width: '70rem', maxWidth: '95vw' }" (onHide)="onHide()">
 
   <div class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-6 h-auto md:h-125">
 
     <div class="flex flex-col gap-4 overflow-y-auto overflow-x-hidden pr-4">
       <h3 class="font-semibold text-lg">Logs</h3>
       @for (log of tourStateService.selectedTourLogs(); track log.id) {
-        <div class="flex flex-col gap-2 border-b pb-4">
-          <div class="flex justify-between items-center">
-            <div class="flex items-center gap-4">
-              <span class="font-semibold">{{ log.creationDate | date }}</span>
-              <p-rating [ngModel]="log.rating" [readonly]="true" />
-            </div>
-            <div class="flex gap-2">
-              <button pButton label="Edit" [text]="true" (click)="startEdit(log)"></button>
-              <button pButton label="Delete" [text]="true" severity="danger" (click)="deleteLog(log.id)"></button>
-            </div>
+      <div class="flex flex-col gap-2 border-b pb-4">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-4">
+            <span class="font-semibold">{{ log.creationDate | date }}</span>
+            <span class="text-sm text-surface-500 flex items-center gap-1">
+              <i class="pi pi-map-marker"></i>{{ log.totalDistance }} km
+            </span>
+            <span class="text-sm text-surface-500 flex items-center gap-1">
+              <i class="pi pi-clock"></i>{{ log.totalTime }} min
+            </span>
+            <p-rating [ngModel]="log.rating" [readonly]="true" [ngModelOptions]="{standalone: true}" />
+            <p-tag [value]="TourDifficulty[log.difficulty]"
+              [severity]="log.difficulty === TourDifficulty.Easy ? 'success' : log.difficulty === TourDifficulty.Medium ? 'warn' : 'danger'" />
           </div>
-          <p>{{ log.description }}</p>
+          <div class="flex gap-2">
+            <button pButton label="Edit" [text]="true" (click)="startEdit(log)"></button>
+            <button pButton label="Delete" [text]="true" severity="danger" (click)="deleteLog(log.id)"></button>
+          </div>
         </div>
+        <p>{{ log.description }}</p>
+      </div>
       } @empty {
-        <p class="text-gray-500">No logs yet.</p>
+      <p class="text-gray-500">No logs yet.</p>
       }
     </div>
 
     <form (ngSubmit)="onSubmit()" class="flex flex-col gap-3 md:border-l md:pl-6 border-t pt-4 md:border-t-0 md:pt-0">
       <h3 class="font-semibold text-lg">{{ editingLog() ? 'Edit Log' : 'New Log' }}</h3>
+      <select [ngModel]="logDifficulty()" (ngModelChange)="logDifficulty.set(+$event)" name="difficulty"
+        class="w-full rounded-lg px-3 py-2 text-sm border border-surface-300 bg-surface-0 text-surface-700 hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors appearance-none">
+        <option [value]="TourDifficulty.Easy">Easy</option>
+        <option [value]="TourDifficulty.Medium">Medium</option>
+        <option [value]="TourDifficulty.Hard">Hard</option>
+      </select>
+      <div class="flex items-center gap-10">
+        <label class="text-sm font-medium text-surface-600 whitespace-nowrap">Total Distance (km)</label>
+        <input pInputText type="number" min="0" [value]="logTotalDistance()" (input)="onDistanceChange($event)"
+          placeholder="0" class="" />
+
+      </div>
+
+      <div class="flex items-center gap-10">
+        <label class="text-sm font-medium text-surface-600 whitespace-nowrap">Total Time (min)</label>
+        <input pInputText type="number" min="0" [value]="logTotalTime()" (input)="onTimeChange($event)" placeholder="0"
+          class="" />
+      </div>
       <div class="flex flex-col gap-1">
         <textarea pTextarea [ngModel]="logDescription()" (ngModelChange)="logDescription.set($event)"
           placeholder="Description" rows="5" class="w-full" [ngModelOptions]="{standalone: true}"></textarea>
