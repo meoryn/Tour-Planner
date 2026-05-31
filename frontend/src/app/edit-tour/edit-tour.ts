@@ -4,11 +4,12 @@ import { TourSidebarComponent } from '../tour-sidebar/tour-sidebar';
 import { ActivatedRoute, Params } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TourStateService } from '../tour-state-service';
+import { MapComponent } from '../map/map';
 
 @Component({
   selector: 'app-edit-tour',
   templateUrl: './edit-tour.html',
-  imports: [Card, TourSidebarComponent],
+  imports: [Card, TourSidebarComponent, MapComponent],
   standalone: true,
 })
 export class EditTourComponent {
