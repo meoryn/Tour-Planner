@@ -22,6 +22,5 @@ export class MapFacade {
 
   destroy(): void {
     this.map?.remove();
-    this.map = undefined;
   }
 }
