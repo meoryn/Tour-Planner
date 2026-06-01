@@ -20,12 +20,16 @@ export class TourList {
   }
 
   async importTour(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
     if (!file) return;
     try {
       const text = await file.text();
-      const tour = JSON.parse(text) as Tour
-      this.tourStateService.addTour(tour)
+      const parsed = JSON.parse(text);
+      const tours: Tour[] = Array.isArray(parsed) ? parsed : [parsed];
+      for (const tour of tours) {
+        this.tourStateService.addTour(tour);
+      }
     } catch {
       console.error("invalid json format");
     }
