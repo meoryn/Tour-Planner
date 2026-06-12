@@ -3,13 +3,39 @@
     (ngModelChange)="selectedTransport.set($event)" optionLabel="label" optionValue="value" [ngModelOptions]="{standalone: true}" />
 
   <div class="w-full flex flex-col gap-1">
-    <input pInputText [value]="from()" (input)="from.set($any($event.target).value)" placeholder="From" class="w-full" />
+    <p-autocomplete
+      [ngModel]="from()"
+      (ngModelChange)="from.set($event)"
+      [ngModelOptions]="{standalone: true}"
+      [suggestions]="fromSuggestions()"
+      (completeMethod)="searchFrom($event)"
+      (onSelect)="onFromSelect($event)"
+      optionLabel="label"
+      optionValue="label"
+      [delay]="500"
+      [forceSelection]="false"
+      [fluid]="true"
+      placeholder="From"
+      class="w-full" />
     @if (errors()['from']) {
       <small class="text-red-500 text-sm">{{ errors()['from'] }}</small>
     }
   </div>
   <div class="w-full flex flex-col gap-1">
-    <input pInputText [value]="to()" (input)="to.set($any($event.target).value)" placeholder="To" class="w-full" />
+    <p-autocomplete
+      [ngModel]="to()"
+      (ngModelChange)="to.set($event)"
+      [ngModelOptions]="{standalone: true}"
+      [suggestions]="toSuggestions()"
+      (completeMethod)="searchTo($event)"
+      (onSelect)="onToSelect($event)"
+      optionLabel="label"
+      optionValue="label"
+      [delay]="500"
+      [forceSelection]="false"
+      [fluid]="true"
+      placeholder="To"
+      class="w-full" />
     @if (errors()['to']) {
       <small class="text-red-500 text-sm">{{ errors()['to'] }}</small>
     }

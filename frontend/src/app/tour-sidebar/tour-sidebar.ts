@@ -1,12 +1,16 @@
-import { Component, input, linkedSignal, inject, signal } from '@angular/core';
+import { Component, input, linkedSignal, inject, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { SelectButton } from 'primeng/selectbutton';
 import { InputText } from 'primeng/inputtext';
 import { Textarea } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
+import { AutoCompleteModule, AutoCompleteCompleteEvent, AutoCompleteSelectEvent } from 'primeng/autocomplete';
 import { TransportType, Tour, TourStateService } from '../tour-state-service';
 import { Router } from '@angular/router';
 import { getValidationErrors } from '../shared/validation-utils';
+import { OpenRouteService, Poi } from '../open-route-service';
+
 import * as v from 'valibot';
 
 const TourSchema = v.object({
@@ -19,12 +23,14 @@ const TourSchema = v.object({
 @Component({
   selector: 'app-tour-sidebar',
   templateUrl: './tour-sidebar.html',
-  imports: [FormsModule, SelectButton, InputText, Textarea, ButtonModule],
+  imports: [FormsModule, SelectButton, InputText, Textarea, ButtonModule, AutoCompleteModule],
   standalone: true,
 })
 export class TourSidebarComponent {
   private tourStateService = inject(TourStateService);
   private router = inject(Router);
+  private openRouteService = inject(OpenRouteService);
+  private destroyRef = inject(DestroyRef);
 
   transportTypes = [
     { label: 'Walk', value: TransportType.Walk },
@@ -46,6 +52,37 @@ export class TourSidebarComponent {
   duration = linkedSignal<number>(() => this.currentTour()?.totalDuration ?? 0);
 
   errors = signal<Record<string, string>>({});
+
+  fromSuggestions = signal<Poi[]>([]);
+  selectedFrom = signal<Poi | null>(null);
+
+  toSuggestions = signal<Poi[]>([]);
+  selectedTo = signal<Poi | null>(null);
+
+  searchFrom(event: AutoCompleteCompleteEvent) {
+    this.openRouteService
+      .getGeocodes(event.query)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((pois) => this.fromSuggestions.set(pois));
+  }
+
+  onFromSelect(event: AutoCompleteSelectEvent) {
+    this.selectedFrom.set(event.value as Poi);
+  }
+
+  searchTo(event: AutoCompleteCompleteEvent) {
+    this.openRouteService
+      .getGeocodes(event.query)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((pois) => this.toSuggestions.set(pois));
+  }
+
+  onToSelect(event: AutoCompleteSelectEvent) {
+    this.selectedTo.set(event.value as Poi);
+  }
+
+
+
 
   onSubmit() {
     const formResult = v.safeParse(TourSchema, {
