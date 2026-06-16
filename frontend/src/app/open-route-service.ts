@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, map, catchError, of } from 'rxjs';
+import { Coordinates } from './models/coordinates';
 
 export type BoundingBox = [number, number, number, number];
 
@@ -16,6 +17,10 @@ export interface Geometry {
   coordinates: number[]
 }
 
+export function toCoordinates(geometry: Geometry): Coordinates {
+  return { lng: geometry.coordinates[0], lat: geometry.coordinates[1] };
+}
+
 export interface Feature {
   name: string,
   geometry: Geometry,
@@ -27,7 +32,7 @@ export interface Properties {
 }
 
 export interface Poi {
-  geometry: Geometry,
+  coordinates: Coordinates,
   label: string
 }
 
@@ -48,7 +53,7 @@ export class OpenRouteService {
       map(res => (res.features ?? [])
         .filter(feature => feature.geometry?.type === "Point")
         .map(feature => ({
-          geometry: feature.geometry,
+          coordinates: toCoordinates(feature.geometry),
           label: feature.properties.label,
         }))),
       catchError(() => of([])),

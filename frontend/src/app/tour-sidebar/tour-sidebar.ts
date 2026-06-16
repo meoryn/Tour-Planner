@@ -1,21 +1,26 @@
-import { Component, input, linkedSignal, inject, signal, DestroyRef } from '@angular/core';
+import { Component, input, linkedSignal, inject, signal, effect, DestroyRef } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { SelectButton } from 'primeng/selectbutton';
 import { InputText } from 'primeng/inputtext';
 import { Textarea } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
-import { AutoCompleteModule, AutoCompleteCompleteEvent, AutoCompleteSelectEvent } from 'primeng/autocomplete';
-import { TransportType, Tour, TourStateService } from '../tour-state-service';
+import { AutoCompleteModule, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
+import { TourStateService } from '../tour-state-service';
+import { Tour } from '../models/tour';
+import { TransportType } from '../models/transport-type';
+import { Coordinates } from '../models/coordinates';
+import { Location } from '../models/location';
 import { Router } from '@angular/router';
 import { getValidationErrors } from '../shared/validation-utils';
 import { OpenRouteService, Poi } from '../open-route-service';
+import { TourApiService } from '../tour-api-service';
+import { RouteStateService } from '../route-state-service';
 
 import * as v from 'valibot';
 
 const TourSchema = v.object({
-  from: v.pipe(v.string(), v.minLength(1, 'From is required.')),
-  to: v.pipe(v.string(), v.minLength(1, 'To is required.')),
   tourName: v.pipe(v.string(), v.minLength(1, 'Tour name is required.')),
   description: v.optional(v.string()),
 });
@@ -23,19 +28,33 @@ const TourSchema = v.object({
 @Component({
   selector: 'app-tour-sidebar',
   templateUrl: './tour-sidebar.html',
-  imports: [FormsModule, SelectButton, InputText, Textarea, ButtonModule, AutoCompleteModule],
+  imports: [FormsModule, SelectButton, InputText, Textarea, ButtonModule, AutoCompleteModule, DecimalPipe],
   standalone: true,
 })
 export class TourSidebarComponent {
   private tourStateService = inject(TourStateService);
   private router = inject(Router);
   private openRouteService = inject(OpenRouteService);
+  private tourApiService = inject(TourApiService);
+  private routeStateService = inject(RouteStateService);
   private destroyRef = inject(DestroyRef);
+
+  constructor() {
+    this.routeStateService.clear();
+    effect(() => {
+      const from = this.selectedFrom()?.coordinates;
+      const to = this.selectedTo()?.coordinates;
+      const transportType = this.selectedTransport();
+      if (from && to && transportType) {
+        this.fetchRoute(from, to, transportType);
+      }
+    })
+  }
 
   transportTypes = [
     { label: 'Walk', value: TransportType.Walk },
     { label: 'Car', value: TransportType.Car },
-    { label: 'Train', value: TransportType.Train },
+    { label: 'Cycle', value: TransportType.Cycle },
   ];
 
   mode = input<'Add' | 'Edit'>('Add');
@@ -43,8 +62,6 @@ export class TourSidebarComponent {
 
   selectedTransport = linkedSignal<TransportType>(() => this.currentTour()?.transportType ?? TransportType.Car);
 
-  from = linkedSignal<string>(() => this.currentTour()?.from ?? '');
-  to = linkedSignal<string>(() => this.currentTour()?.to ?? '');
   tourName = linkedSignal<string>(() => this.currentTour()?.tourName ?? '');
   description = linkedSignal<string>(() => this.currentTour()?.description ?? '');
 
@@ -54,20 +71,28 @@ export class TourSidebarComponent {
   errors = signal<Record<string, string>>({});
 
   fromSuggestions = signal<Poi[]>([]);
-  selectedFrom = signal<Poi | null>(null);
+  selectedFrom = linkedSignal<Location | null>(() => {
+    const tour = this.currentTour();
+    if (tour) {
+      return tour.from;
+    }
+    return null;
+  });
 
   toSuggestions = signal<Poi[]>([]);
-  selectedTo = signal<Poi | null>(null);
+  selectedTo = linkedSignal<Location | null>(() => {
+    const tour = this.currentTour();
+    if (tour) {
+      return tour.to;
+    }
+    return null;
+  });
 
   searchFrom(event: AutoCompleteCompleteEvent) {
     this.openRouteService
       .getGeocodes(event.query)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((pois) => this.fromSuggestions.set(pois));
-  }
-
-  onFromSelect(event: AutoCompleteSelectEvent) {
-    this.selectedFrom.set(event.value as Poi);
   }
 
   searchTo(event: AutoCompleteCompleteEvent) {
@@ -77,30 +102,47 @@ export class TourSidebarComponent {
       .subscribe((pois) => this.toSuggestions.set(pois));
   }
 
-  onToSelect(event: AutoCompleteSelectEvent) {
-    this.selectedTo.set(event.value as Poi);
+  onTransportChange(type: TransportType) {
+    this.selectedTransport.set(type);
   }
 
-
+  fetchRoute(from: Coordinates, to: Coordinates, transportType: TransportType) {
+    this.tourApiService.getDirections(from, to, transportType).subscribe(({totalDistance, totalDuration, coordinates}) => {
+      this.distance.set(totalDistance / 1000);
+      this.duration.set(totalDuration / 60);
+      this.routeStateService.setRoute(coordinates)
+    })
+  }
 
 
   onSubmit() {
     const formResult = v.safeParse(TourSchema, {
-      from: this.from(),
-      to: this.to(),
       tourName: this.tourName(),
       description: this.description(),
     });
 
-    if (formResult.success) {
-      this.errors.set({});
-      if (this.mode() === 'Edit') {
-        this.editTour();
-      } else {
-        this.addTour();
-      }
+    const errors: Record<string, string> = {};
+
+    if (!formResult.success) {
+      Object.assign(errors, getValidationErrors(formResult.issues));
+    }
+    if (!this.selectedFrom()) {
+      errors['from'] = 'Please select a start location from the suggestions.';
+    }
+    if (!this.selectedTo()) {
+      errors['to'] = 'Please select a destination from the suggestions.';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      this.errors.set(errors);
+      return;
+    }
+
+    this.errors.set({});
+    if (this.mode() === 'Edit') {
+      this.editTour();
     } else {
-      this.errors.set(getValidationErrors(formResult.issues));
+      this.addTour();
     }
   }
 
@@ -108,8 +150,8 @@ export class TourSidebarComponent {
     const newTour: Tour = {
       tourName: this.tourName(),
       description: this.description(),
-      from: this.from(),
-      to: this.to(),
+      from: this.selectedFrom()!,
+      to: this.selectedTo()!,
       transportType: this.selectedTransport(),
       totalDistance: this.distance(),
       totalDuration: this.duration(),
@@ -125,8 +167,8 @@ export class TourSidebarComponent {
     const editedTour: Tour = {
       tourName: this.tourName(),
       description: this.description(),
-      from: this.from(),
-      to: this.to(),
+      from: this.selectedFrom()!,
+      to: this.selectedTo()!,
       transportType: this.selectedTransport(),
       totalDistance: this.distance(),
       totalDuration: this.duration(),

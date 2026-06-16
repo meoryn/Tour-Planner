@@ -1,5 +1,7 @@
 import { Component, inject, Input, signal } from '@angular/core';
-import { Tour, TourStateService } from '../tour-state-service';
+import { DecimalPipe } from '@angular/common';
+import { TourStateService } from '../tour-state-service';
+import { Tour } from '../models/tour';
 import { Card } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TourLogsDialog } from '../tour-logs-dialog/tour-logs-dialog';
@@ -7,7 +9,7 @@ import { RouterLink } from "@angular/router";
 
 @Component({
   selector: 'app-tour-card',
-  imports: [Card, ButtonModule, TourLogsDialog, RouterLink],
+  imports: [Card, ButtonModule, TourLogsDialog, RouterLink, DecimalPipe],
   templateUrl: './tour-card.html',
   styleUrl: './tour-card.css',
 })

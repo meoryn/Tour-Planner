@@ -1,19 +1,17 @@
 <form (ngSubmit)="onSubmit()" class="flex flex-col gap-4 items-center">
   <p-selectbutton [options]="transportTypes" [ngModel]="selectedTransport()"
-    (ngModelChange)="selectedTransport.set($event)" optionLabel="label" optionValue="value" [ngModelOptions]="{standalone: true}" />
+    (ngModelChange)="onTransportChange($event)" optionLabel="label" optionValue="value" [ngModelOptions]="{standalone: true}" />
 
   <div class="w-full flex flex-col gap-1">
     <p-autocomplete
-      [ngModel]="from()"
-      (ngModelChange)="from.set($event)"
+      [ngModel]="selectedFrom()"
+      (ngModelChange)="selectedFrom.set($event)"
       [ngModelOptions]="{standalone: true}"
       [suggestions]="fromSuggestions()"
       (completeMethod)="searchFrom($event)"
-      (onSelect)="onFromSelect($event)"
       optionLabel="label"
-      optionValue="label"
       [delay]="500"
-      [forceSelection]="false"
+      [forceSelection]="true"
       [fluid]="true"
       placeholder="From"
       class="w-full" />
@@ -23,16 +21,14 @@
   </div>
   <div class="w-full flex flex-col gap-1">
     <p-autocomplete
-      [ngModel]="to()"
-      (ngModelChange)="to.set($event)"
+      [ngModel]="selectedTo()"
+      (ngModelChange)="selectedTo.set($event)"
       [ngModelOptions]="{standalone: true}"
       [suggestions]="toSuggestions()"
       (completeMethod)="searchTo($event)"
-      (onSelect)="onToSelect($event)"
       optionLabel="label"
-      optionValue="label"
       [delay]="500"
-      [forceSelection]="false"
+      [forceSelection]="true"
       [fluid]="true"
       placeholder="To"
       class="w-full" />
@@ -43,15 +39,14 @@
 
   <div class="w-full py-2">
     <h3 class="text-center font-semibold mb-2 text-xl pb-5">Route Details</h3>
-    <!-- Those are fixed for now since they are coming from the backend later on -->
     <div class="flex justify-around">
       <div class="flex flex-col items-center gap-2">
         <span class="font-bold text-lg">Distance:</span>
-        <span> {{ distance() }} km</span>
+        <span> {{ distance() | number: '1.0-1' }} km</span>
       </div>
       <div class="flex flex-col items-center gap-2">
         <span class="font-bold text-lg">Duration:</span>
-        <span> {{ duration() }} min</span>
+        <span> {{ duration() | number: '1.0-1' }} min</span>
       </div>
     </div>
   </div>

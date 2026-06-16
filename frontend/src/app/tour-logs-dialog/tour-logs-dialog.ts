@@ -1,7 +1,9 @@
 import { Component, inject, model, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TourDifficulty, TourLog, TourStateService } from '../tour-state-service';
+import { TourStateService } from '../tour-state-service';
+import { TourLog } from '../models/tour-log';
+import { TourDifficulty } from '../models/tour-difficulty';
 import { Dialog } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { Textarea } from 'primeng/textarea';

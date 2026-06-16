@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { TourCard } from "../tour-card/tour-card";
-import { Tour, TourStateService } from '../tour-state-service';
+import { TourStateService } from '../tour-state-service';
+import { Tour } from '../models/tour';
 import { ButtonModule } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 

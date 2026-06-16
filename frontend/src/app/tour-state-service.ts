@@ -1,47 +1,7 @@
-import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { UserStateService } from './user-state-service';
-import { NumberSymbol } from '@angular/common';
-
-export enum TransportType {
-  Walk = 'walk',
-  Car = 'car',
-  Train = 'train',
-}
-
-//Used later when we add leaflet maps
-export type MapCoordinates = {
-  lat: number;
-  lng: number;
-};
-
-export type TourLog = {
-  id: number;
-  creationDate: Date;
-  description: string;
-  difficulty: TourDifficulty;
-  totalDistance: number;
-  totalTime: number;
-  rating: number;
-};
-
-export enum TourDifficulty {
-  Hard,
-  Medium,
-  Easy
-}
-
-export type Tour = {
-  transportType: TransportType;
-  totalDistance: number;
-  totalDuration: number;
-  from: string;
-  to: string;
-  tourName: string;
-  description: string;
-  logs?: TourLog[];
-  creatorId: number;
-  id?: number;
-};
+import { Tour } from './models/tour';
+import { TourLog } from './models/tour-log';
 
 @Injectable({
   providedIn: 'root',
@@ -52,56 +12,7 @@ export class TourStateService {
 
   private userStateService = inject(UserStateService);
 
-  private readonly _tours = signal<Tour[]>([
-    {
-      id: 1,
-      creatorId: 1,
-      tourName: 'Tour1',
-      from: 'Wien',
-      to: 'Graz',
-      transportType: TransportType.Car,
-      totalDistance: 200,
-      totalDuration: 2,
-      description: 'Autfahrt von Wien nach Graz',
-      logs: [],
-    },
-    {
-      id: 2,
-      creatorId: 1, 
-      tourName: 'Tour2',
-      from: 'Graz',
-      to: 'Salzburg',
-      transportType: TransportType.Train,
-      totalDistance: 280,
-      totalDuration: 3,
-      description: 'Zugfahrt nach Salzburg',
-      logs: [],
-    },
-    {
-      id: 3,
-      creatorId: 1,
-      tourName: 'Tour3',
-      from: 'Salzburg',
-      to: 'Innsbruck',
-      transportType: TransportType.Car,
-      totalDistance: 150,
-      totalDuration: 1.5,
-      description: 'Autofahrt von Salzburg nach Innsbruck',
-      logs: [],
-    },
-    {
-      id: 4,
-      creatorId: 1,
-      tourName: 'Tour4',
-      from: 'Stephansdom',
-      to: 'Prater',
-      transportType: TransportType.Walk,
-      totalDistance: 5,
-      totalDuration: 1,
-      description: 'Spaziergang durch Wien',
-      logs: [],
-    },
-  ]);
+  private readonly _tours = signal<Tour[]>([]);
 
   public tours = this._tours.asReadonly();
 
