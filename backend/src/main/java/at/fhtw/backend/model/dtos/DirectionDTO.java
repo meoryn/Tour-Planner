@@ -1,5 +1,6 @@
 package at.fhtw.backend.model.dtos;
 
+import at.fhtw.backend.model.entities.Location;
 import at.fhtw.backend.model.entities.TransportType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -10,11 +11,11 @@ public class DirectionDTO {
 
     @NotNull
     @Valid
-    private Coordinates from;
+    private Location from;
 
     @NotNull
     @Valid
-    private Coordinates to;
+    private Location to;
 
     @NotNull
     private TransportType transportType;

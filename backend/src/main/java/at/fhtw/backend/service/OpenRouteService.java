@@ -7,6 +7,7 @@ import at.fhtw.backend.model.openrouteservice.DirectionResponse;
 import at.fhtw.backend.model.openrouteservice.feature;
 import at.fhtw.backend.model.openrouteservice.summary;
 
+import at.fhtw.backend.utils.LocationUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -30,7 +31,7 @@ public class OpenRouteService {
 
         DirectionResponse response = restClient.post()
                 .uri("/{profile}/geojson", profile)
-                .body(Map.of("coordinates", new float[][] { request.getFrom().toLonLat(), request.getTo().toLonLat() }))
+                .body(Map.of("coordinates", new float[][] {LocationUtils.getCoordinates(request.getFrom()), LocationUtils.getCoordinates(request.getTo()) }))
                 .retrieve()
                 .body(DirectionResponse.class);
 
