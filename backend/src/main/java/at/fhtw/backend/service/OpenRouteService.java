@@ -31,7 +31,7 @@ public class OpenRouteService {
 
         DirectionResponse response = restClient.post()
                 .uri("/{profile}/geojson", profile)
-                .body(Map.of("coordinates", new float[][] {LocationUtils.getCoordinates(request.getFrom()), LocationUtils.getCoordinates(request.getTo()) }))
+                .body(Map.of("coordinates", new double[][] {LocationUtils.getCoordinates(request.getFrom()), LocationUtils.getCoordinates(request.getTo()) }))
                 .retrieve()
                 .body(DirectionResponse.class);
 

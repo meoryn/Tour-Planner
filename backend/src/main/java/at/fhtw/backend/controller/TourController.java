@@ -2,13 +2,11 @@ package at.fhtw.backend.controller;
 
 import at.fhtw.backend.model.dtos.RequestTourDto;
 import at.fhtw.backend.model.dtos.ResponseTourDto;
-import at.fhtw.backend.model.entities.Tour;
 import at.fhtw.backend.security.UserPrincipal;
 import at.fhtw.backend.service.TourService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +15,6 @@ import java.util.List;
 @RequestMapping("/tours")
 public class TourController {
 
-
     private final TourService tourService;
 
     public TourController(TourService tourService) {
@@ -25,24 +22,28 @@ public class TourController {
     }
 
     @GetMapping
-    public List<Tour> getAllTours(@AuthenticationPrincipal UserPrincipal principal) {
+    public List<ResponseTourDto> getAllTours(@AuthenticationPrincipal UserPrincipal principal) {
         return tourService.getAllToursByUserId(principal.getId());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseTourDto createTour(@RequestBody @Validated RequestTourDto tourDto, @AuthenticationPrincipal UserPrincipal principal){
+    public ResponseTourDto createTour(@RequestBody @Valid RequestTourDto tourDto,
+                                      @AuthenticationPrincipal UserPrincipal principal) {
         return tourService.createTour(tourDto, principal.getId());
     }
 
     @PutMapping("/{tourId}")
-    public ResponseTourDto updateTour(@PathVariable Long tourId, @RequestBody @Validated RequestTourDto requestTourDto, @AuthenticationPrincipal UserPrincipal principal){
+    public ResponseTourDto updateTour(@PathVariable Long tourId,
+                                      @RequestBody @Valid RequestTourDto requestTourDto,
+                                      @AuthenticationPrincipal UserPrincipal principal) {
         return tourService.updateTour(tourId, requestTourDto, principal.getId());
     }
 
     @DeleteMapping("/{tourId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public boolean deleteTour(@PathVariable Long tourId, @AuthenticationPrincipal UserPrincipal principal){
-        return tourService.deleteTour(tourId, principal.getId());
+    public void deleteTour(@PathVariable Long tourId,
+                           @AuthenticationPrincipal UserPrincipal principal) {
+        tourService.deleteTour(tourId, principal.getId());
     }
 }

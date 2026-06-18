@@ -1,6 +1,7 @@
 package at.fhtw.backend.controller;
 
 import at.fhtw.backend.exception.TourNotFoundException;
+import at.fhtw.backend.exception.TourOperationsNotAllowedException;
 import at.fhtw.backend.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,8 +37,14 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", ex.getMessage()));
     }
 
+    @ExceptionHandler(TourOperationsNotAllowedException.class)
+    public ResponseEntity<Map<String, String>> handleTourForbidden(TourOperationsNotAllowedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleTourNotFound(UserNotFoundException ex) {
+    public ResponseEntity<Map<String, String>> handleUserNotFound(UserNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", ex.getMessage()));
     }

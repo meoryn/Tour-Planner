@@ -4,6 +4,7 @@ import at.fhtw.backend.model.entities.Location;
 import at.fhtw.backend.model.entities.TransportType;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Value;
 
 import java.io.Serializable;
@@ -14,16 +15,15 @@ import java.io.Serializable;
 @Value
 public class RequestTourDto implements Serializable {
 
-    @NotNull
     @NotEmpty
     String title;
 
-    @NotNull
     @NotEmpty
     String description;
 
     @NotNull
     Location from;
+
     @NotNull
     Location to;
 
@@ -31,8 +31,10 @@ public class RequestTourDto implements Serializable {
     TransportType transportType;
 
     @NotNull
+    @Positive
     Double totalDistance;
 
     @NotNull
+    @Positive
     Double totalDuration;
 }

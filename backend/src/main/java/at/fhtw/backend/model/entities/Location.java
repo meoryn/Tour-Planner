@@ -15,9 +15,7 @@ public class Location {
     @NotNull
     private String label;
 
-    @NotNull
-    private float lat;
+    private double lat;
 
-    @NotNull
-    private float lng;
+    private double lng;
 }
