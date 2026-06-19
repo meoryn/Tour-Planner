@@ -1,5 +1,5 @@
 <p-dialog
-  [header]="(tourStateService.selectedTour()?.tourName ?? '') + ' — Tour Logs'"
+  [header]="(tourStateService.selectedTour()?.title ?? '') + ' — Tour Logs'"
   [(visible)]="visible"
   [modal]="true"
   [style]="{ width: '70rem', maxWidth: '95vw' }"

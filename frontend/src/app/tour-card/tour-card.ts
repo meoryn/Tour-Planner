@@ -1,11 +1,12 @@
-import { Component, inject, Input, signal } from '@angular/core';
+import { Component, Input, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { TourStateService } from '../tour-state-service';
-import { Tour } from '../models/tour';
+import { SavedTour } from '../models/tour';
 import { Card } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
+import { MessageService } from 'primeng/api';
 import { TourLogsDialog } from '../tour-logs-dialog/tour-logs-dialog';
-import { RouterLink } from "@angular/router";
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-tour-card',
@@ -14,9 +15,10 @@ import { RouterLink } from "@angular/router";
   styleUrl: './tour-card.css',
 })
 export class TourCard {
-  @Input() tour!: Tour;
+  @Input() tour!: SavedTour;
 
   private tourStateService = inject(TourStateService);
+  private messageService = inject(MessageService);
 
   logsDialogVisible = signal(false);
 
@@ -25,10 +27,30 @@ export class TourCard {
   }
 
   showLogs() {
-    this.tourStateService.selectTour(this.tour.id!);
+    this.tourStateService.selectTour(this.tour.id);
     this.logsDialogVisible.set(true);
   }
+
   removeTour() {
-    this.tourStateService.removeTour(this.tour.tourName);
+    this.tourStateService.removeTourById(this.tour.id).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Tour removed',
+          detail: this.tour.title,
+        });
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Delete failed',
+          detail: 'Could not delete the tour',
+        });
+      },
+    });
+  }
+
+  formatTransport(value: string): string {
+    return value.charAt(0) + value.slice(1).toLowerCase();
   }
 }

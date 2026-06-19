@@ -1,5 +1,5 @@
 export enum TransportType {
-  Walk = 'walk',
-  Car = 'car',
-  Cycle = 'cycle',
+  Walk = 'WALK',
+  Car = 'CAR',
+  Cycle = 'CYCLE',
 }

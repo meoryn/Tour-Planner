@@ -1,7 +1,8 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, map, catchError, of } from 'rxjs';
-import { Coordinates } from './models/coordinates';
+import { Location } from './models/location';
+import { SKIP_AUTH } from './auth-interceptor';
 
 export type BoundingBox = [number, number, number, number];
 
@@ -17,10 +18,6 @@ export interface Geometry {
   coordinates: number[]
 }
 
-export function toCoordinates(geometry: Geometry): Coordinates {
-  return { lng: geometry.coordinates[0], lat: geometry.coordinates[1] };
-}
-
 export interface Feature {
   name: string,
   geometry: Geometry,
@@ -31,10 +28,7 @@ export interface Properties {
   label: string
 }
 
-export interface Poi {
-  coordinates: Coordinates,
-  label: string
-}
+export type Poi = Location;
 
 @Injectable({
   providedIn: 'root',
@@ -49,11 +43,15 @@ export class OpenRouteService {
       .set('api_key', this.apiKey)
       .set('text', address);
 
-    return this.http.get<GeocodeResponse>(this.url + "geocode/search", { params }).pipe(
+    return this.http.get<GeocodeResponse>(this.url + "geocode/search", {
+      params,
+      context: new HttpContext().set(SKIP_AUTH, true),
+    }).pipe(
       map(res => (res.features ?? [])
         .filter(feature => feature.geometry?.type === "Point")
         .map(feature => ({
-          coordinates: toCoordinates(feature.geometry),
+          lng: feature.geometry.coordinates[0],
+          lat: feature.geometry.coordinates[1],
           label: feature.properties.label,
         }))),
       catchError(() => of([])),

@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, OnInit, computed, inject } from '@angular/core';
 import { Card } from 'primeng/card';
 import { TourSidebarComponent } from '../tour-sidebar/tour-sidebar';
 import { ActivatedRoute, Params } from '@angular/router';
@@ -12,12 +12,17 @@ import { MapComponent } from '../map/map';
   imports: [Card, TourSidebarComponent, MapComponent],
   standalone: true,
 })
-export class EditTourComponent {
-
+export class EditTourComponent implements OnInit {
   private activatedRoute = inject(ActivatedRoute);
   private tourStateService = inject(TourStateService);
 
   private params = toSignal(this.activatedRoute.params, { initialValue: {} as Params });
   tourID = computed(() => Number(this.params()['id']));
   currentTour = computed(() => this.tourStateService.getTourById(this.tourID()) ?? null);
+
+  ngOnInit() {
+    if (this.tourStateService.tours().length === 0) {
+      this.tourStateService.loadTours().subscribe();
+    }
+  }
 }

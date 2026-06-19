@@ -8,9 +8,10 @@ export type Tour = {
   totalDuration: number;
   from: Location;
   to: Location;
-  tourName: string;
+  title: string;
   description: string;
   logs?: TourLog[];
-  creatorId: number;
   id?: number;
 };
+
+export type SavedTour = Tour & { id: number };

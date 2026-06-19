@@ -1,18 +1,18 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { UserStateService } from './user-state-service';
-import { Tour } from './models/tour';
+import { Observable, tap } from 'rxjs';
+import { Tour, SavedTour } from './models/tour';
 import { TourLog } from './models/tour-log';
+import { TourApiService } from './tour-api-service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TourStateService {
-  private tourIdCounter = 5;
   private logIdCounter = 1;
 
-  private userStateService = inject(UserStateService);
+  private tourApi = inject(TourApiService);
 
-  private readonly _tours = signal<Tour[]>([]);
+  private readonly _tours = signal<SavedTour[]>([]);
 
   public tours = this._tours.asReadonly();
 
@@ -23,32 +23,39 @@ export class TourStateService {
     if (!query) return this._tours();
     return this._tours().filter(
       (t) =>
-        t.tourName.toLowerCase().includes(query) || t.description.toLowerCase().includes(query),
+        t.title.toLowerCase().includes(query) || t.description.toLowerCase().includes(query),
     );
   });
 
-  public addTour(tour: Tour) {
-    tour.id = this.tourIdCounter++;
-    this._tours.set([...this._tours(), tour]);
+  public loadTours(): Observable<Tour[]> {
+    return this.tourApi.getAll().pipe(
+      tap((tours) => this._tours.set(tours as SavedTour[])),
+    );
   }
 
-  public removeTour(tourName: string) {
-    this._tours.set(this._tours().filter((t) => t.tourName !== tourName));
+  public addTour(tour: Tour): Observable<Tour> {
+    return this.tourApi.create(tour).pipe(
+      tap((saved) => this._tours.set([...this._tours(), saved as SavedTour])),
+    );
   }
 
-  public editTour(updatedTour: Tour) {
-    this._tours.set(this._tours().map((t) => (t.id === updatedTour.id ? updatedTour : t)));
+  public editTour(updatedTour: SavedTour): Observable<Tour> {
+    return this.tourApi.update(updatedTour.id, updatedTour).pipe(
+      tap((saved) =>
+        this._tours.set(
+          this._tours().map((t) => (t.id === updatedTour.id ? (saved as SavedTour) : t)),
+        ),
+      ),
+    );
   }
 
-  readonly userTours = computed(() => {
-    const currentUser = this.userStateService.currentUser();
-    if (!currentUser) {
-      return [];
-    }
-    return this._tours().filter((t) => t.creatorId === currentUser.id);
-  });
+  public removeTourById(id: number): Observable<void> {
+    return this.tourApi.delete(id).pipe(
+      tap(() => this._tours.set(this._tours().filter((t) => t.id !== id))),
+    );
+  }
 
-  getTourById(id: number): Tour | undefined {
+  getTourById(id: number): SavedTour | undefined {
     return this._tours().find((t) => t.id === id);
   }
 
@@ -112,7 +119,7 @@ export class TourStateService {
   }
 
   public exportSingleTour(tour: Tour) {
-    this.exportTours([tour], tour.tourName + '.json');
+    this.exportTours([tour], tour.title + '.json');
   }
 
   private exportTours(tours: Tour[], filename: string) {

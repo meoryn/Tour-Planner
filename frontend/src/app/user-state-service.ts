@@ -1,35 +1,52 @@
-import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
-export type User = {
-  id: number;
-  email: string;
-  password: string;
+export type AuthUser = {
+  username: string;
+  token: string;
 };
 
-@Injectable({
-  providedIn: 'root',
-})
-export class UserStateService {
-  private readonly _users = signal<User[]>([]);
-  private readonly _currentUser = signal<User | null>(null);
+const STORAGE_KEY = 'tourplanner.auth';
 
-  public users = this._users.asReadonly();
+@Injectable({ providedIn: 'root' })
+export class UserStateService {
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
+
+  private readonly _currentUser = signal<AuthUser | null>(this.restore());
+
   public currentUser = this._currentUser.asReadonly();
 
-  registerUser(user: User) {
-    this._users.set([...this._users(), user]);
+  isAuthenticated(): boolean {
+    return this._currentUser() !== null;
   }
 
-  removeUser(email: string) {
-    this._users.set(this._users().filter(u => u.email !== email));
+  getToken(): string | null {
+    return this._currentUser()?.token ?? null;
   }
 
-  loginUser(email: string, password: string) {
-    const user = this._users().find(u => u.email === email && u.password === password);
-    if (user) {
-      this._currentUser.set(user);
-    } else {
-      //TODO: Handle login failure (e.g., show error message)
+  setSession(user: AuthUser) {
+    this._currentUser.set(user);
+    if (this.isBrowser) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    }
+  }
+
+  logout() {
+    this._currentUser.set(null);
+    if (this.isBrowser) {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }
+
+  private restore(): AuthUser | null {
+    if (!this.isBrowser) return null;
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as AuthUser;
+    } catch {
+      return null;
     }
   }
 }

@@ -1,11 +1,10 @@
 import { Injectable, effect, inject } from '@angular/core';
 import type * as L from 'leaflet';
-import { Coordinates } from '../models/coordinates';
 import { RouteStateService } from '../route-state-service';
 
 @Injectable()
 export class MapFacade {
-  private center: Coordinates = { lat: 48.2082, lng: 16.3738 };
+  private center = { lat: 48.2082, lng: 16.3738 };
   private zoom = 14;
 
   private routeState = inject(RouteStateService);

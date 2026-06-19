@@ -1,7 +1,7 @@
 <p-card class="w-full">
   <div class="flex flex-col md:flex-row justify-between items-center mb-4 min-w-0">
     <div class="flex flex-col md:flex-row items-center gap-1 md:gap-4 text-sm md:text-base min-w-0">
-      <h2 class="text-xl md:text-3xl font-bold wrap-break-word text-center md:text-left hover:text-emerald-500 cursor-pointer" [routerLink]="`/tour/${tour.id}/edit`">{{ tour.tourName }}</h2>
+      <h2 class="text-xl md:text-3xl font-bold wrap-break-word text-center md:text-left hover:text-emerald-500 cursor-pointer" [routerLink]="`/tour/${tour.id}/edit`">{{ tour.title }}</h2>
       <span class="text-gray-300 hidden md:inline">|</span>
       <span>{{ tour.from.label }} &rarr; {{ tour.to.label }}</span>
       <span class="text-gray-300 hidden md:inline">|</span>
@@ -10,7 +10,7 @@
         <span class="text-gray-300 hidden md:inline">|</span>
         <span>{{ tour.totalDuration | number: '1.0-1' }}min</span>
         <span class="text-gray-300 hidden md:inline">|</span>
-        <span>{{ tour.transportType[0].toUpperCase() + tour.transportType.substring(1) }}</span>
+        <span>{{ formatTransport(tour.transportType) }}</span>
       </span>
     </div>
     <div class="flex items-center gap-2 mt-2 md:mt-0">
