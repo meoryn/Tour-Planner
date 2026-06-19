@@ -35,6 +35,7 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    //TODO: Handle what happens if user already exists
     @PostMapping("/register")
     public String register(@RequestBody @Valid RegisterUserDto dto) {
         User user = new User();
