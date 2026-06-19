@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './auth-guard';
+
 export const routes: Routes = [
     {
         path: '',
@@ -14,14 +16,17 @@ export const routes: Routes = [
     },
     {
         path: 'tour/:id/edit',
+        canActivate: [authGuard],
         loadComponent: () => import('./edit-tour/edit-tour').then(m => m.EditTourComponent)
     },
     {
         path: 'tour/add',
+        canActivate: [authGuard],
         loadComponent: () => import('./add-tour/add-tour').then(m => m.AddTourComponent)
     },
     {
         path: 'tourlist',
+        canActivate: [authGuard],
         loadComponent: () => import('./tour-list/tour-list').then(m => m.TourList)
     }
 ];

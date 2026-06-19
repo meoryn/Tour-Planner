@@ -5,8 +5,16 @@
 
   <!-- Desktop links -->
   <div class="hidden md:flex gap-4 items-center">
-    <a [routerLink]="'/tour/add'" class="text-green-500 hover:underline cursor-pointer">Create Tour</a>
-    <a [routerLink]="'/tourlist'" class="text-green-500 hover:underline cursor-pointer">Tour List</a>
+    @if (currentUser()) {
+      <a [routerLink]="'/tour/add'" class="text-green-500 hover:underline cursor-pointer">Create Tour</a>
+      <a [routerLink]="'/tourlist'" class="text-green-500 hover:underline cursor-pointer">Tour List</a>
+      <span class="text-gray-300">|</span>
+      <span class="text-gray-700">{{ currentUser()!.username }}</span>
+      <button pButton label="Logout" [text]="true" (click)="logout()"></button>
+    } @else {
+      <a [routerLink]="'/login'" class="text-green-500 hover:underline cursor-pointer">Login</a>
+      <a [routerLink]="'/register'" class="text-green-500 hover:underline cursor-pointer">Register</a>
+    }
   </div>
 
   <!-- Mobile hamburger button -->
@@ -19,7 +27,14 @@
     <span class="font-bold text-lg">Menu</span>
   </ng-template>
   <div class="flex flex-col gap-4">
-    <a [routerLink]="'/tour/add'" class="text-green-500 hover:underline cursor-pointer" (click)="drawerVisible.set(false)">Create Tour</a>
-    <a [routerLink]="'/tourlist'" class="text-green-500 hover:underline cursor-pointer" (click)="drawerVisible.set(false)">Tour List</a>
+    @if (currentUser()) {
+      <span class="text-gray-700 font-semibold">{{ currentUser()!.username }}</span>
+      <a [routerLink]="'/tour/add'" class="text-green-500 hover:underline cursor-pointer" (click)="drawerVisible.set(false)">Create Tour</a>
+      <a [routerLink]="'/tourlist'" class="text-green-500 hover:underline cursor-pointer" (click)="drawerVisible.set(false)">Tour List</a>
+      <button pButton label="Logout" [text]="true" (click)="logout()"></button>
+    } @else {
+      <a [routerLink]="'/login'" class="text-green-500 hover:underline cursor-pointer" (click)="drawerVisible.set(false)">Login</a>
+      <a [routerLink]="'/register'" class="text-green-500 hover:underline cursor-pointer" (click)="drawerVisible.set(false)">Register</a>
+    }
   </div>
 </p-drawer>
