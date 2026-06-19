@@ -1,5 +1,5 @@
 export enum TourDifficulty {
-  Hard,
-  Medium,
-  Easy,
+  Easy = 'EASY',
+  Medium = 'MEDIUM',
+  Hard = 'HARD',
 }

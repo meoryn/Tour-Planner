@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { EMPTY, Observable, tap } from 'rxjs';
 import { Tour, SavedTour } from './models/tour';
 import { TourLog } from './models/tour-log';
 import { TourApiService } from './tour-api-service';
@@ -8,8 +8,6 @@ import { TourApiService } from './tour-api-service';
   providedIn: 'root',
 })
 export class TourStateService {
-  private logIdCounter = 1;
-
   private tourApi = inject(TourApiService);
 
   private readonly _tours = signal<SavedTour[]>([]);
@@ -77,35 +75,59 @@ export class TourStateService {
     this.selectedTourId.set(null);
   }
 
-  public addTourLog(log: Omit<TourLog, 'id'>) {
-    const tourId = this.selectedTourId();
-    if (tourId === null) return;
-    const newLog: TourLog = { ...log, id: this.logIdCounter++ };
-    this._tours.set(
-      this._tours().map((t) =>
-        t.id === tourId ? { ...t, logs: [...(t.logs ?? []), newLog] } : t,
+  public loadTourLogs(tourId: number): Observable<TourLog[]> {
+    return this.tourApi.getTourLogs(tourId).pipe(
+      tap((logs) =>
+        this._tours.set(
+          this._tours().map((t) => (t.id === tourId ? { ...t, logs } : t)),
+        ),
       ),
     );
   }
 
-  public editTourLog(log: TourLog) {
+  public addTourLog(log: Omit<TourLog, 'id' | 'creationDate'>): Observable<TourLog> {
     const tourId = this.selectedTourId();
-    if (tourId === null) return;
-    this._tours.set(
-      this._tours().map((t) =>
-        t.id === tourId
-          ? { ...t, logs: (t.logs ?? []).map((l) => (l.id === log.id ? log : l)) }
-          : t,
+    if (tourId === null) return EMPTY;
+    return this.tourApi.createTourLog(tourId, log).pipe(
+      tap((saved) =>
+        this._tours.set(
+          this._tours().map((t) =>
+            t.id === tourId ? { ...t, logs: [...(t.logs ?? []), saved] } : t,
+          ),
+        ),
       ),
     );
   }
 
-  public removeTourLog(logId: number) {
+  public editTourLog(
+    logId: number,
+    log: Omit<TourLog, 'id' | 'creationDate'>,
+  ): Observable<TourLog> {
     const tourId = this.selectedTourId();
-    if (tourId === null) return;
-    this._tours.set(
-      this._tours().map((t) =>
-        t.id === tourId ? { ...t, logs: (t.logs ?? []).filter((l) => l.id !== logId) } : t,
+    if (tourId === null) return EMPTY;
+    return this.tourApi.updateTourLog(logId, tourId, log).pipe(
+      tap((saved) =>
+        this._tours.set(
+          this._tours().map((t) =>
+            t.id === tourId
+              ? { ...t, logs: (t.logs ?? []).map((l) => (l.id === saved.id ? saved : l)) }
+              : t,
+          ),
+        ),
+      ),
+    );
+  }
+
+  public removeTourLog(logId: number): Observable<void> {
+    const tourId = this.selectedTourId();
+    if (tourId === null) return EMPTY;
+    return this.tourApi.deleteTourLog(logId).pipe(
+      tap(() =>
+        this._tours.set(
+          this._tours().map((t) =>
+            t.id === tourId ? { ...t, logs: (t.logs ?? []).filter((l) => l.id !== logId) } : t,
+          ),
+        ),
       ),
     );
   }

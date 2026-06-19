@@ -29,6 +29,14 @@ export class TourCard {
   showLogs() {
     this.tourStateService.selectTour(this.tour.id);
     this.logsDialogVisible.set(true);
+    this.tourStateService.loadTourLogs(this.tour.id).subscribe({
+      error: () =>
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Failed to load logs',
+          detail: this.tour.title,
+        }),
+    });
   }
 
   removeTour() {

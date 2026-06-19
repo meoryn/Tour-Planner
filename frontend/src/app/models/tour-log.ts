@@ -3,7 +3,7 @@ import { TourDifficulty } from './tour-difficulty';
 export type TourLog = {
   id: number;
   creationDate: Date;
-  description: string;
+  comment: string;
   difficulty: TourDifficulty;
   totalDistance: number;
   totalTime: number;

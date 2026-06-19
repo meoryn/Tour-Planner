@@ -1,8 +1,11 @@
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Location } from './models/location';
 import { Tour } from './models/tour';
+import { TourLog } from './models/tour-log';
+import { TourDifficulty } from './models/tour-difficulty';
 import { TransportType } from './models/transport-type';
 import { SKIP_AUTH } from './auth-interceptor';
 
@@ -10,6 +13,16 @@ export interface Directions {
   totalDistance: number;
   totalDuration: number;
   coordinates: number[][];
+}
+
+interface ResponseTourLogDto {
+  id: number;
+  creationDate: string;
+  comment: string;
+  difficulty: TourDifficulty;
+  totalDistance: number;
+  totalTime: number;
+  rating: number;
 }
 
 @Injectable({
@@ -47,6 +60,38 @@ export class TourApiService {
     return this.http.delete<void>(`${this.baseUrl}/tours/${id}`);
   }
 
+  public getTourLogs(tourId: number): Observable<TourLog[]> {
+    return this.http
+      .get<ResponseTourLogDto[]>(`${this.baseUrl}/tour-logs`, { params: { tourId } })
+      .pipe(map((dtos) => dtos.map(this.fromTourLogDto)));
+  }
+
+  public createTourLog(
+    tourId: number,
+    log: Omit<TourLog, 'id' | 'creationDate'>,
+  ): Observable<TourLog> {
+    return this.http
+      .post<ResponseTourLogDto>(`${this.baseUrl}/tour-logs`, this.toTourLogRequestBody(tourId, log))
+      .pipe(map(this.fromTourLogDto));
+  }
+
+  public updateTourLog(
+    tourLogId: number,
+    tourId: number,
+    log: Omit<TourLog, 'id' | 'creationDate'>,
+  ): Observable<TourLog> {
+    return this.http
+      .put<ResponseTourLogDto>(
+        `${this.baseUrl}/tour-logs/${tourLogId}`,
+        this.toTourLogRequestBody(tourId, log),
+      )
+      .pipe(map(this.fromTourLogDto));
+  }
+
+  public deleteTourLog(tourLogId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/tour-logs/${tourLogId}`);
+  }
+
   private toRequestBody(tour: Tour) {
     return {
       title: tour.title,
@@ -58,4 +103,25 @@ export class TourApiService {
       totalDuration: tour.totalDuration,
     };
   }
+
+  private toTourLogRequestBody(tourId: number, log: Omit<TourLog, 'id' | 'creationDate'>) {
+    return {
+      tourId,
+      comment: log.comment,
+      difficulty: log.difficulty,
+      totalDistance: log.totalDistance,
+      totalTime: log.totalTime,
+      rating: log.rating,
+    };
+  }
+
+  private fromTourLogDto = (dto: ResponseTourLogDto): TourLog => ({
+    id: dto.id,
+    creationDate: new Date(dto.creationDate),
+    comment: dto.comment,
+    difficulty: dto.difficulty,
+    totalDistance: dto.totalDistance,
+    totalTime: dto.totalTime,
+    rating: dto.rating,
+  });
 }
