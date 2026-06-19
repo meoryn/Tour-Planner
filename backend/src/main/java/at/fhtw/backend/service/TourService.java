@@ -37,6 +37,12 @@ public class TourService {
         return tours;
     }
 
+    @Transactional(readOnly = true)
+    public Tour getTourById(Long tourId) {
+        return tourRepository.findById(tourId)
+                .orElseThrow(() -> new TourNotFoundException(tourId));
+    }
+
     @Transactional
     public ResponseTourDto createTour(RequestTourDto tourDto, long userId) {
         User user = userService.getUserReference(userId);

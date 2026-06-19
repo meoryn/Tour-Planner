@@ -22,6 +22,10 @@ public class TourLog {
     @JoinColumn(name = "tour_id", nullable = false)
     private Tour tour;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Column(nullable = false)
     private LocalDateTime creationDate;
 

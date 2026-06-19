@@ -1,10 +1,6 @@
 package at.fhtw.backend.controller;
 
-import at.fhtw.backend.exception.RouteServiceException;
-import at.fhtw.backend.exception.TourNotFoundException;
-import at.fhtw.backend.exception.TourOperationsNotAllowedException;
-import at.fhtw.backend.exception.UserNotFoundException;
-import at.fhtw.backend.exception.UsernameAlreadyExistsException;
+import at.fhtw.backend.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -70,6 +66,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleRouteService(RouteServiceException ex) {
         log.error("OpenRouteService failure: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(TourLogNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleUserNotFound(TourLogNotFoundException ex) {
+        log.warn("TourLog not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(TourLogOperationsNotAllowedException.class)
+    public ResponseEntity<Map<String, String>> handleTourForbidden(TourLogOperationsNotAllowedException ex) {
+        log.warn("Forbidden tourLog operation: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(Map.of("error", ex.getMessage()));
     }
 
