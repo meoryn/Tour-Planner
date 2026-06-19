@@ -1,17 +1,17 @@
 info:
-  name: Delete Tour copy
+  name: Create Tour
   type: http
-  seq: 6
+  seq: 1
 
 http:
-  method: PUT
-  url: http://localhost:8080/tours/1
+  method: POST
+  url: http://localhost:8080/tours
   body:
     type: json
     data: |-
       {
          "title": "Vienna to Berlin",
-         "description": "Road trip deluxe from Vienna (AT) to Berlin (DE).",
+         "description": "Road trip from Vienna (AT) to Berlin (DE).",
          "from": {
            "label": "Vienna, Austria",
            "lat": 48.2082,
@@ -28,7 +28,7 @@ http:
       }
   auth:
     type: bearer
-    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QiLCJpYXQiOjE3ODE4NjA1MjIsImV4cCI6MTc4MTg2NDEyMn0.-3O_1eTEmyJ_acdr9LGhO_RdhSozVyq1O97mYxu-gHY
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QiLCJpYXQiOjE3ODE4ODczMjgsImV4cCI6MTc4MTg5MDkyOH0.WWNMpvIHl5_4-gkE7SaWog_sAiOY7E_lMCQbtxtaS-s
 
 settings:
   encodeUrl: true

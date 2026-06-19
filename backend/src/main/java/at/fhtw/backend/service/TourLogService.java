@@ -44,14 +44,14 @@ public class TourLogService {
         Tour targetTour = tourService.getTourById(tourLog.getTourId());
         User user = userService.getUserReference(userId);
 
-        return TourUtils.toDtoFromTourLog(TourUtils.createTourLogFromDto(tourLog, targetTour, user));
+        return TourUtils.toDtoFromTourLog(tourLogRepository.save(TourUtils.createTourLogFromDto(tourLog, targetTour, user)));
     }
 
     @Transactional
     public ResponseTourLogDto update(RequestTourLogDto tourLog, long tourLogId, long userId) {
         log.debug("Updating tour log with id: {}", tourLogId);
 
-        TourLog targetTourLog = tourLogRepository.findById(tourLogId).orElseThrow();
+        TourLog targetTourLog = tourLogRepository.findById(tourLogId).orElseThrow(() -> new TourLogNotFoundException("Could not find tour log with id: " + tourLogId));
 
         if(targetTourLog.getUser().getId() != userId) {
             throw new TourLogOperationsNotAllowedException("User " + userId + " is not allowed to modify tour log " + tourLogId);

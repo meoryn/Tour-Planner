@@ -43,7 +43,7 @@ public class TourUtils {
 
         return new ResponseTourLogDto(
                 tourLog.getId(),
-                tourLog.getCreationDate(),
+                tourLog.getCreatedAt(),
                 tourLog.getComment(),
                 tourLog.getDifficulty(),
                 tourLog.getTotalDistance(),

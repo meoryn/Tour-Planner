@@ -1,17 +1,17 @@
 info:
-  name: Create Tour
+  name: Update Tour
   type: http
-  seq: 4
+  seq: 1
 
 http:
-  method: POST
-  url: http://localhost:8080/tours
+  method: PUT
+  url: http://localhost:8080/tours/1
   body:
     type: json
     data: |-
       {
          "title": "Vienna to Berlin",
-         "description": "Road trip from Vienna (AT) to Berlin (DE).",
+         "description": "Road trip deluxe from Vienna (AT) to Berlin (DE).",
          "from": {
            "label": "Vienna, Austria",
            "lat": 48.2082,

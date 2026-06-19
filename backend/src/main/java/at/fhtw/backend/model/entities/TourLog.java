@@ -2,6 +2,8 @@ package at.fhtw.backend.model.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -26,8 +28,13 @@ public class TourLog {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(updatable = false, nullable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
     @Column(nullable = false)
-    private LocalDateTime creationDate;
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     @Column(nullable = false)
     private String comment;
