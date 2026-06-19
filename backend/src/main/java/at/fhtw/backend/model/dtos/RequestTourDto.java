@@ -2,6 +2,7 @@ package at.fhtw.backend.model.dtos;
 
 import at.fhtw.backend.model.entities.Location;
 import at.fhtw.backend.model.entities.TransportType;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -22,9 +23,11 @@ public class RequestTourDto implements Serializable {
     String description;
 
     @NotNull
+    @Valid
     Location from;
 
     @NotNull
+    @Valid
     Location to;
 
     @NotNull
