@@ -2,7 +2,7 @@
   <p-selectbutton [options]="transportTypes" [ngModel]="selectedTransport()"
     (ngModelChange)="onTransportChange($event)" optionLabel="label" optionValue="value" [ngModelOptions]="{standalone: true}" />
 
-  <div class="w-full flex flex-col gap-1">
+  <div class="w-full flex flex-row gap-1">
     <p-autocomplete
       [ngModel]="selectedFrom()"
       (ngModelChange)="selectedFrom.set($event)"
@@ -18,8 +18,16 @@
     @if (errors()['from']) {
       <small class="text-red-500 text-sm">{{ errors()['from'] }}</small>
     }
+      <button
+        pButton
+        type="button"
+        icon="pi pi-map-marker"
+        [severity]="pickTarget() === 'from' ? 'primary' : 'secondary'"
+        (click)="pickOnMap('from')"
+        aria-label="Pick start on map">
+        </button>
   </div>
-  <div class="w-full flex flex-col gap-1">
+  <div class="w-full flex flex-row gap-1">
     <p-autocomplete
       [ngModel]="selectedTo()"
       (ngModelChange)="selectedTo.set($event)"
@@ -35,6 +43,14 @@
     @if (errors()['to']) {
       <small class="text-red-500 text-sm">{{ errors()['to'] }}</small>
     }
+          <button
+        pButton
+        type="button"
+        icon="pi pi-map-marker"
+        [severity]="pickTarget() === 'to' ? 'primary' : 'secondary'"
+        (click)="pickOnMap('to')"
+        aria-label="Pick end on map">
+        </button>
   </div>
 
   <div class="w-full py-2">

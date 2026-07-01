@@ -17,6 +17,7 @@ import { getValidationErrors } from '../shared/validation-utils';
 import { OpenRouteService, Poi } from '../open-route-service';
 import { TourApiService } from '../tour-api-service';
 import { RouteStateService } from '../route-state-service';
+import { MapPickService } from '../map-pick-service';
 
 import * as v from 'valibot';
 
@@ -37,11 +38,16 @@ export class TourSidebarComponent {
   private openRouteService = inject(OpenRouteService);
   private tourApiService = inject(TourApiService);
   private routeStateService = inject(RouteStateService);
+  private mapPickService = inject(MapPickService);
   private destroyRef = inject(DestroyRef);
   private messageService = inject(MessageService);
 
+  pickTarget = this.mapPickService.activeTarget;
+
   constructor() {
     this.routeStateService.clear();
+    this.mapPickService.reset();
+
     effect(() => {
       const from = this.selectedFrom();
       const to = this.selectedTo();
@@ -50,6 +56,27 @@ export class TourSidebarComponent {
         this.fetchRoute(from, to, transportType);
       }
     });
+
+    effect(() => {
+      const picked = this.mapPickService.pickedLocation();
+      if (picked) {
+        if (this.mapPickService.activeTarget() === 'from') {
+          this.selectedFrom.set(picked);
+          this.mapPickService.pickedLocation.set(null);
+
+        } else if (this.mapPickService.activeTarget() === 'to') {
+
+          this.selectedTo.set(picked);
+          this.mapPickService.pickedLocation.set(null);
+
+        }
+        this.mapPickService.reset();
+      }
+    });
+  }
+
+  pickOnMap(target: 'from' | 'to') {
+    this.mapPickService.toggle(target);
   }
 
   transportTypes = [

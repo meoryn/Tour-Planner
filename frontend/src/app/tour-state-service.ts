@@ -20,8 +20,10 @@ export class TourStateService {
     const query = this.searchQuery().toLowerCase();
     if (!query) return this._tours();
     return this._tours().filter(
-      (t) =>
-        t.title.toLowerCase().includes(query) || t.description.toLowerCase().includes(query),
+      (tour) =>
+        tour.title.toLowerCase().includes(query) ||
+        tour.description.toLowerCase().includes(query) ||
+        (tour.logs ?? []).some((log) => log.comment.toLowerCase().includes(query)),
     );
   });
 

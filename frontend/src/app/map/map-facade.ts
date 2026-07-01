@@ -1,6 +1,7 @@
 import { Injectable, effect, inject } from '@angular/core';
 import type * as L from 'leaflet';
 import { RouteStateService } from '../route-state-service';
+import { MapPickService } from '../map-pick-service';
 
 @Injectable()
 export class MapFacade {
@@ -8,6 +9,7 @@ export class MapFacade {
   private zoom = 14;
 
   private routeState = inject(RouteStateService);
+  private pickService = inject(MapPickService);
 
   private leaflet?: typeof import('leaflet');
   private map?: L.Map;
@@ -28,6 +30,18 @@ export class MapFacade {
     this.map.invalidateSize();
 
     this.drawRoute(this.routeState.coordinates());
+
+    this.map.on("click", event => this.handlePick(event.latlng));
+  }
+
+  private handlePick(latlng: L.LatLng): void {
+    if (!this.pickService.activeTarget()) return;
+
+    this.pickService.pickedLocation.set({
+      lat: latlng.lat,
+      lng: latlng.lng,
+      label: `${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`,
+    });
   }
 
   private drawRoute(coordinates: number[][] | null): void {
