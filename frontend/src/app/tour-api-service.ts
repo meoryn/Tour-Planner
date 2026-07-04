@@ -1,4 +1,4 @@
-import { HttpClient, HttpContext } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -7,7 +7,6 @@ import { Tour } from './models/tour';
 import { TourLog } from './models/tour-log';
 import { TourDifficulty } from './models/tour-difficulty';
 import { TransportType } from './models/transport-type';
-import { SKIP_AUTH } from './auth-interceptor';
 
 export interface Directions {
   totalDistance: number;
@@ -40,7 +39,6 @@ export class TourApiService {
     return this.http.post<Directions>(
       `${this.baseUrl}/directions`,
       { from, to, transportType },
-      { context: new HttpContext().set(SKIP_AUTH, true) },
     );
   }
 
