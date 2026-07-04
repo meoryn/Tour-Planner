@@ -5,7 +5,6 @@ import org.springframework.security.core.userdetails.*;
 import at.fhtw.backend.persistence.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 
 
 @Service
