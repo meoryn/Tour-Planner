@@ -100,7 +100,7 @@ class TourServiceTest {
         when(tourRepository.save(any(Tour.class))).thenAnswer(toSave -> {
             Tour tourSave = toSave.getArgument(0);
             tourSave.setId(99L);
-            return toSave;
+            return tourSave;
         });
 
         ResponseTourDto result = tourService.createTour(testDto("New Tour"), 1L);

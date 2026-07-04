@@ -3,8 +3,10 @@ package at.fhtw.backend.service;
 import at.fhtw.backend.exception.RouteServiceException;
 import at.fhtw.backend.model.dtos.DirectionDTO;
 import at.fhtw.backend.model.entities.Direction;
+import at.fhtw.backend.model.entities.Location;
 import at.fhtw.backend.model.entities.TransportType;
 import at.fhtw.backend.model.openrouteservice.DirectionResponse;
+import at.fhtw.backend.model.openrouteservice.GeocodeResponse;
 import at.fhtw.backend.model.openrouteservice.feature;
 import at.fhtw.backend.model.openrouteservice.summary;
 
@@ -18,6 +20,8 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -30,7 +34,7 @@ public class OpenRouteService {
     @Autowired
     public OpenRouteService(@Value("${openrouteservice.api-key}") String apiKey) {
         this.restClient = RestClient.builder()
-                .baseUrl("https://api.openrouteservice.org/v2/directions")
+                .baseUrl("https://api.openrouteservice.org")
                 .defaultHeader("Authorization", apiKey)
                 .build();
     }
@@ -48,7 +52,7 @@ public class OpenRouteService {
         DirectionResponse response;
         try {
             response = restClient.post()
-                    .uri("/{profile}/geojson", profile)
+                    .uri("/v2/directions/{profile}/geojson", profile)
                     .body(Map.of("coordinates", new double[][]{
                             LocationUtils.getCoordinates(request.getFrom()),
                             LocationUtils.getCoordinates(request.getTo())
@@ -90,6 +94,55 @@ public class OpenRouteService {
                 summary.distance(),
                 summary.duration(),
                 feature.geometry().coordinates());
+    }
+
+    public List<Location> geocode(String text) {
+        if (text == null || text.isBlank()) {
+            return List.of();
+        }
+
+        log.info("Requesting ORS geocoding for text='{}'", text);
+
+        GeocodeResponse response;
+        try {
+            response = restClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/geocode/search")
+                            .queryParam("text", text)
+                            .build())
+                    .retrieve()
+                    .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+                            (req, res) -> {
+                                String body = readBody(res);
+                                log.error("ORS geocoding failed: status={} body={}", res.getStatusCode(), body);
+                                throw new RouteServiceException(
+                                        "OpenRouteService rejected the geocoding request (" + res.getStatusCode() + "): " + body);
+                            })
+                    .body(GeocodeResponse.class);
+        } catch (RouteServiceException e) {
+            throw e;
+        } catch (RestClientException e) {
+            log.error("ORS geocoding failed with transport error", e);
+            throw new RouteServiceException("Could not reach OpenRouteService: " + e.getMessage(), e);
+        }
+
+        if (response == null || response.features() == null) {
+            return List.of();
+        }
+
+        return Arrays.stream(response.features())
+                .filter(feature -> feature != null
+                        && feature.geometry() != null
+                        && "Point".equals(feature.geometry().type())
+                        && feature.geometry().coordinates() != null
+                        && feature.geometry().coordinates().length >= 2
+                        && feature.properties() != null
+                        && feature.properties().label() != null)
+                .map(feature -> new Location(
+                        feature.properties().label(),
+                        feature.geometry().coordinates()[1],
+                        feature.geometry().coordinates()[0]))
+                .toList();
     }
 
     private String toOrsProfile(TransportType transportType) {

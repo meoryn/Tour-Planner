@@ -24,7 +24,7 @@ export function tourPopularity(tour: Tour): number {
 
 
 export function isTourChildFriendly(tour: Tour): boolean {
-  if (!tour.logs) {
+  if (!tour.logs || tour.logs.length === 0) {
     return false
   }
 

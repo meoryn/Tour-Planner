@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { EMPTY, Observable, tap } from 'rxjs';
-import { Tour, SavedTour } from './models/tour';
+import { Tour, SavedTour, tourPopularity, isTourChildFriendly } from './models/tour';
 import { TourLog } from './models/tour-log';
 import { TourApiService } from './tour-api-service';
 
@@ -23,7 +23,9 @@ export class TourStateService {
       (tour) =>
         tour.title.toLowerCase().includes(query) ||
         tour.description.toLowerCase().includes(query) ||
-        (tour.logs ?? []).some((log) => log.comment.toLowerCase().includes(query)),
+        (tour.logs ?? []).some((log) => log.comment.toLowerCase().includes(query)) ||
+        tourPopularity(tour).toString() === query ||
+        (isTourChildFriendly(tour) && 'child-friendly'.includes(query)),
     );
   });
 
