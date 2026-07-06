@@ -1,107 +1,16 @@
-import { Injectable, computed, effect, inject, signal } from '@angular/core';
-import { UserStateService } from './user-state-service';
-import { NumberSymbol } from '@angular/common';
-
-export enum TransportType {
-  Walk = 'walk',
-  Car = 'car',
-  Train = 'train',
-}
-
-//Used later when we add leaflet maps
-export type MapCoordinates = {
-  lat: number;
-  lng: number;
-};
-
-export type TourLog = {
-  id: number;
-  creationDate: Date;
-  description: string;
-  difficulty: TourDifficulty;
-  totalDistance: number;
-  totalTime: number;
-  rating: number;
-};
-
-export enum TourDifficulty {
-  Hard,
-  Medium,
-  Easy
-}
-
-export type Tour = {
-  transportType: TransportType;
-  totalDistance: number;
-  totalDuration: number;
-  from: string;
-  to: string;
-  tourName: string;
-  description: string;
-  logs?: TourLog[];
-  creatorId: number;
-  id?: number;
-};
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { EMPTY, Observable, tap } from 'rxjs';
+import { Tour, SavedTour, tourPopularity, isTourChildFriendly } from './models/tour';
+import { TourLog } from './models/tour-log';
+import { TourApiService } from './tour-api-service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TourStateService {
-  private tourIdCounter = 5;
-  private logIdCounter = 1;
+  private tourApi = inject(TourApiService);
 
-  private userStateService = inject(UserStateService);
-
-  private readonly _tours = signal<Tour[]>([
-    {
-      id: 1,
-      creatorId: 1,
-      tourName: 'Verlängertes Wochenende',
-      from: 'Wien',
-      to: 'Graz',
-      transportType: TransportType.Car,
-      totalDistance: 200,
-      totalDuration: 2,
-      description: 'Klassische Autofahrt durch die Steiermark.',
-      logs: [],
-    },
-    {
-      id: 2,
-      creatorId: 1, 
-      tourName: 'Familientrip',
-      from: 'Graz',
-      to: 'Salzburg',
-      transportType: TransportType.Train,
-      totalDistance: 280,
-      totalDuration: 3,
-      description: 'Entspannte Zugfahrt mit Blick auf die Alpen.',
-      logs: [],
-    },
-    {
-      id: 3,
-      creatorId: 1,
-      tourName: 'Alpenüberquerung',
-      from: 'Salzburg',
-      to: 'Innsbruck',
-      transportType: TransportType.Car,
-      totalDistance: 150,
-      totalDuration: 1.5,
-      description: 'Kurze Fahrt durch das Salzachtal.',
-      logs: [],
-    },
-    {
-      id: 4,
-      creatorId: 1,
-      tourName: 'Wien Stadtspaziergang',
-      from: 'Stephansdom',
-      to: 'Prater',
-      transportType: TransportType.Walk,
-      totalDistance: 5,
-      totalDuration: 1,
-      description: 'Gemütlicher Spaziergang durch die Wiener Innenstadt.',
-      logs: [],
-    },
-  ]);
+  private readonly _tours = signal<SavedTour[]>([]);
 
   public tours = this._tours.asReadonly();
 
@@ -111,33 +20,44 @@ export class TourStateService {
     const query = this.searchQuery().toLowerCase();
     if (!query) return this._tours();
     return this._tours().filter(
-      (t) =>
-        t.tourName.toLowerCase().includes(query) || t.description.toLowerCase().includes(query),
+      (tour) =>
+        tour.title.toLowerCase().includes(query) ||
+        tour.description.toLowerCase().includes(query) ||
+        (tour.logs ?? []).some((log) => log.comment.toLowerCase().includes(query)) ||
+        tourPopularity(tour).toString() === query ||
+        (isTourChildFriendly(tour) && 'child-friendly'.includes(query)),
     );
   });
 
-  public addTour(tour: Tour) {
-    tour.id = this.tourIdCounter++;
-    this._tours.set([...this._tours(), tour]);
+  public loadTours(): Observable<Tour[]> {
+    return this.tourApi.getAll().pipe(
+      tap((tours) => this._tours.set(tours as SavedTour[])),
+    );
   }
 
-  public removeTour(tourName: string) {
-    this._tours.set(this._tours().filter((t) => t.tourName !== tourName));
+  public addTour(tour: Tour): Observable<Tour> {
+    return this.tourApi.create(tour).pipe(
+      tap((saved) => this._tours.set([...this._tours(), saved as SavedTour])),
+    );
   }
 
-  public editTour(updatedTour: Tour) {
-    this._tours.set(this._tours().map((t) => (t.id === updatedTour.id ? updatedTour : t)));
+  public editTour(updatedTour: SavedTour): Observable<Tour> {
+    return this.tourApi.update(updatedTour.id, updatedTour).pipe(
+      tap((saved) =>
+        this._tours.set(
+          this._tours().map((t) => (t.id === updatedTour.id ? (saved as SavedTour) : t)),
+        ),
+      ),
+    );
   }
 
-  readonly userTours = computed(() => {
-    const currentUser = this.userStateService.currentUser();
-    if (!currentUser) {
-      return [];
-    }
-    return this._tours().filter((t) => t.creatorId === currentUser.id);
-  });
+  public removeTourById(id: number): Observable<void> {
+    return this.tourApi.delete(id).pipe(
+      tap(() => this._tours.set(this._tours().filter((t) => t.id !== id))),
+    );
+  }
 
-  getTourById(id: number): Tour | undefined {
+  getTourById(id: number): SavedTour | undefined {
     return this._tours().find((t) => t.id === id);
   }
 
@@ -159,35 +79,59 @@ export class TourStateService {
     this.selectedTourId.set(null);
   }
 
-  public addTourLog(log: Omit<TourLog, 'id'>) {
-    const tourId = this.selectedTourId();
-    if (tourId === null) return;
-    const newLog: TourLog = { ...log, id: this.logIdCounter++ };
-    this._tours.set(
-      this._tours().map((t) =>
-        t.id === tourId ? { ...t, logs: [...(t.logs ?? []), newLog] } : t,
+  public loadTourLogs(tourId: number): Observable<TourLog[]> {
+    return this.tourApi.getTourLogs(tourId).pipe(
+      tap((logs) =>
+        this._tours.set(
+          this._tours().map((t) => (t.id === tourId ? { ...t, logs } : t)),
+        ),
       ),
     );
   }
 
-  public editTourLog(log: TourLog) {
+  public addTourLog(log: Omit<TourLog, 'id' | 'creationDate'>): Observable<TourLog> {
     const tourId = this.selectedTourId();
-    if (tourId === null) return;
-    this._tours.set(
-      this._tours().map((t) =>
-        t.id === tourId
-          ? { ...t, logs: (t.logs ?? []).map((l) => (l.id === log.id ? log : l)) }
-          : t,
+    if (tourId === null) return EMPTY;
+    return this.tourApi.createTourLog(tourId, log).pipe(
+      tap((saved) =>
+        this._tours.set(
+          this._tours().map((t) =>
+            t.id === tourId ? { ...t, logs: [...(t.logs ?? []), saved] } : t,
+          ),
+        ),
       ),
     );
   }
 
-  public removeTourLog(logId: number) {
+  public editTourLog(
+    logId: number,
+    log: Omit<TourLog, 'id' | 'creationDate'>,
+  ): Observable<TourLog> {
     const tourId = this.selectedTourId();
-    if (tourId === null) return;
-    this._tours.set(
-      this._tours().map((t) =>
-        t.id === tourId ? { ...t, logs: (t.logs ?? []).filter((l) => l.id !== logId) } : t,
+    if (tourId === null) return EMPTY;
+    return this.tourApi.updateTourLog(logId, tourId, log).pipe(
+      tap((saved) =>
+        this._tours.set(
+          this._tours().map((t) =>
+            t.id === tourId
+              ? { ...t, logs: (t.logs ?? []).map((l) => (l.id === saved.id ? saved : l)) }
+              : t,
+          ),
+        ),
+      ),
+    );
+  }
+
+  public removeTourLog(logId: number): Observable<void> {
+    const tourId = this.selectedTourId();
+    if (tourId === null) return EMPTY;
+    return this.tourApi.deleteTourLog(logId).pipe(
+      tap(() =>
+        this._tours.set(
+          this._tours().map((t) =>
+            t.id === tourId ? { ...t, logs: (t.logs ?? []).filter((l) => l.id !== logId) } : t,
+          ),
+        ),
       ),
     );
   }
@@ -201,7 +145,7 @@ export class TourStateService {
   }
 
   public exportSingleTour(tour: Tour) {
-    this.exportTours([tour], tour.tourName + '.json');
+    this.exportTours([tour], tour.title + '.json');
   }
 
   private exportTours(tours: Tour[], filename: string) {

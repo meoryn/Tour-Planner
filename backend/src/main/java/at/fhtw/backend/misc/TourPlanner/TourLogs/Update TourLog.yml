@@ -1,0 +1,28 @@
+info:
+  name: Update TourLog
+  type: http
+  seq: 3
+
+http:
+  method: PUT
+  url: http://localhost:8080/tour-logs/3
+  body:
+    type: json
+    data: |-
+      {
+          "tourId": 3,
+          "comment": "Tour is mid I guess",
+          "difficulty": "MEDIUM",
+          "totalDistance": 12.4,
+          "totalTime": 1,
+          "rating": 2
+        }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QiLCJpYXQiOjE3ODE4ODczMjgsImV4cCI6MTc4MTg5MDkyOH0.WWNMpvIHl5_4-gkE7SaWog_sAiOY7E_lMCQbtxtaS-s
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

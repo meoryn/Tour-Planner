@@ -1,0 +1,28 @@
+info:
+  name: Create TourLog for specific Tour
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: http://localhost:8080/tour-logs
+  body:
+    type: json
+    data: |-
+      {
+          "tourId": 3,
+          "comment": "Beautiful scenic route, well marked trail",
+          "difficulty": "MEDIUM",
+          "totalDistance": 12.4,
+          "totalTime": 2.5,
+          "rating": 4
+        }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QiLCJpYXQiOjE3ODE4ODczMjgsImV4cCI6MTc4MTg5MDkyOH0.WWNMpvIHl5_4-gkE7SaWog_sAiOY7E_lMCQbtxtaS-s
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

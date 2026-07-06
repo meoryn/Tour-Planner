@@ -1,11 +1,12 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { PrimeNG } from 'primeng/config';
+import { ToastModule } from 'primeng/toast';
 import { NavbarComponent } from './navbar/navbar';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent],
+  imports: [RouterOutlet, NavbarComponent, ToastModule],
   templateUrl: './app.html',
   styleUrl: './app.css',
   standalone: true

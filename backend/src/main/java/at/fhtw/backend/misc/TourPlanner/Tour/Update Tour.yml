@@ -1,0 +1,37 @@
+info:
+  name: Update Tour
+  type: http
+  seq: 1
+
+http:
+  method: PUT
+  url: http://localhost:8080/tours/1
+  body:
+    type: json
+    data: |-
+      {
+         "title": "Vienna to Berlin",
+         "description": "Road trip deluxe from Vienna (AT) to Berlin (DE).",
+         "from": {
+           "label": "Vienna, Austria",
+           "lat": 48.2082,
+           "lng": 16.3738
+         },
+         "to": {
+           "label": "Berlin, Germany",
+           "lat": 52.5200,
+           "lng": 13.4050
+         },
+         "transportType": "CAR",
+         "totalDistance": 680.0,
+         "totalDuration": 7.5
+      }
+  auth:
+    type: bearer
+    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QiLCJpYXQiOjE3ODE4NjA1MjIsImV4cCI6MTc4MTg2NDEyMn0.-3O_1eTEmyJ_acdr9LGhO_RdhSozVyq1O97mYxu-gHY
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

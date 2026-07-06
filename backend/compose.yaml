@@ -3,7 +3,7 @@ services:
     image: 'postgres:latest'
     environment:
       - 'POSTGRES_DB=tourplanner'
-      - 'POSTGRES_PASSWORD=touradminpassword'
-      - 'POSTGRES_USER=touradmin'
+      - 'POSTGRES_PASSWORD=${DB_PASSWORD}'
+      - 'POSTGRES_USER=${DB_USERNAME}'
     ports:
       - "5432:5432"

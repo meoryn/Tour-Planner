@@ -2,19 +2,18 @@
   <h1 class="font-bold text-6xl">Login</h1>
   <div class="border shadow-md p-8 w-full max-w-md flex flex-col gap-4 rounded">
     <div class="flex flex-col gap-2">
-      <label for="login-email">Email</label>
-      <input pInputText type="text" placeholder="Email" class="w-full mb-4" id="login-email" />
+      <label for="login-username">Username</label>
+      <input pInputText type="text" placeholder="Username" class="w-full mb-4" id="login-username"
+        [ngModel]="username()" (ngModelChange)="username.set($event)" />
     </div>
     <div class="flex flex-col gap-2">
       <label for="login-password">Password</label>
-      <input
-        pInputText
-        type="password"
-        placeholder="Password"
-        class="w-full mb-4"
-        id="login-password"
-      />
+      <input pInputText type="password" placeholder="Password" class="w-full mb-4" id="login-password"
+        [ngModel]="password()" (ngModelChange)="password.set($event)" />
     </div>
+    @if (errorMessage()) {
+      <p class="text-red-500 text-sm">{{ errorMessage() }}</p>
+    }
     <a href="/register" class="text-green-400 hover:underline text-sm">Don't have an account? Register here.</a>
     <button pButton type="button" label="Login" class="w-full" (click)="loginUser()"></button>
   </div>
