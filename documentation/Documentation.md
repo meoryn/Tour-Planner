@@ -1,5 +1,41 @@
 # Tour-Planner finale Abgabe
 [Github Link](https://github.com/meoryn/Tour-Planner)
+
+## Setup
+
+### 1. `.env` anlegen
+Als erstes muss eine .env datei im backend Ordner angelegt & ausgefüllt werden, als Vorlage dient die .env.example.
+
+### 2. Datenbank starten
+Die PostgreSQL-Datenbank läuft über Docker Compose und zieht die Zugangsdaten aus der `.env`:
+
+```
+cd backend
+docker compose up -d
+```
+
+### 3. Backend starten
+
+```
+cd backend
+mvn spring-boot:run
+```
+Das Backend läuft anschließend auf `http://localhost:8080`.
+
+### 4. Frontend starten
+```
+cd frontend
+npm npm i
+ng serve
+```
+Die Angular-App ist danach unter `http://localhost:4200` erreichbar.
+
+### Tests ausführen
+```bash
+cd backend  && mvn test  
+cd frontend && ng test       
+```
+
 ## Seiten / Routes
 
 ### Home
